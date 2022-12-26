@@ -88,11 +88,10 @@
 		const tempMatrix = new THREE.Matrix4();
 
 		let group;
-		let balloon, star, snow;
+		let balloon, star, snow, bell1, bell2;
 
 		init();
 		animate();
-        //init2();
 		animateParticles();
 		function init() {
 
@@ -154,14 +153,19 @@
 				scene.add(object);
 			});
 
-			//         fbxLoader = new FBXLoader();
-			//fbxLoader.load('models/newyear/fbx/snowflake/Snowflake.fbx', function (object) {
-			//	snow = object;
-			//            object.scale.setScalar(0.0005);
-			//             object.position.x = 0;
+            fbxLoader = new FBXLoader();
+			fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
+				bell1 = object;
+                //object.scale.setScalar(0.001);
 
-			//             scene.add(object);
-			//});
+            });
+
+            fbxLoader = new FBXLoader();
+			fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
+                bell2 = object;
+    //            object.scale.setScalar(0.025);
+
+			});
 
 			//model
 			const geometries = [
@@ -196,7 +200,7 @@
 					group.add(object);
 				}
 				else {
-					let randomValue = Math.floor(getRandomFloat(0, 2));
+					let randomValue = Math.floor(getRandomFloat(0, 4));
 					createClones(randomValue, i);
 				}
 			}
@@ -228,14 +232,6 @@
 			window.addEventListener('resize', onWindowResize);
 		}
         function initateSnowParticles() {
-            //camera = new THREE.PerspectiveCamera(
-            //    75,
-            //    window.innerWidth / window.innerHeight,
-            //    1,
-            //    2000
-            //);
-            //camera.position.z = 1000;
-
             scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
             const particleSystems = createParticleSystems();
@@ -285,7 +281,6 @@
 						newObject.position.y = Math.random() * 4 - 2;
 						newObject.position.z = Math.random() * 4 - 2;
 
-						newObject.rotation.x = Math.random() * 2 * Math.PI;
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
 						newObject.scale.setScalar(0.0001);
@@ -294,29 +289,33 @@
 					});
 					break;
 				case 2:
-					const snowFbx = new THREE.MeshStandardMaterial({
-						color: Math.random() * 0x6Effff,
-						opacity: 0.6,
-						transparent: true,
-						roughness: 0.7,
-						metalness: 0.0
-					});
+                    fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
+						const newObject = bell1.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
 
-					fbxLoader.load('models/newyear/fbx/snowflake/Snowflake.fbx', function (object) {
-						const newObject = snow.clone();
-						newObject.position.x = Math.random() * 4 - 2;
-						newObject.position.y = Math.random() * 4 - 2;
-						newObject.position.z = Math.random() * 4 - 2;
-
-						newObject.rotation.x = Math.random() * 2 * Math.PI;
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-						newObject.scale.setScalar(0.0008);
-						newObject.children[0].material = snowFbx;
-						newObject.name = i + "_snow_obj";
+						newObject.scale.setScalar(0.001);
+
+                        newObject.name = i + "_bell1_obj";
 						group.add(newObject);
 					});
-					break;
+                case 3:
+                    fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
+                        const newObject = bell2.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(0.015);
+
+                        newObject.name = i + "_bell2_obj";
+                        group.add(newObject);
+                    });
 			}
 		}
 
@@ -597,3 +596,13 @@
 	</script>
 </body>
 </html>
+
+
+<!--To do:
+Check if ar support, else add scene background
+Add wisher name
+add bells
+Add start - done
+add snow - done	
+	
+	-->
