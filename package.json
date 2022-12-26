@@ -1,0 +1,23 @@
+{
+  "name": "greetingar",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajasekar16p/GreetingAR.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rajasekar16p/GreetingAR/issues"
+  },
+  "homepage": "https://github.com/rajasekar16p/GreetingAR#readme",
+  "dependencies": {
+    "gh-pages": "^4.0.0"
+  }
+}
