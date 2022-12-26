@@ -32,8 +32,6 @@
 				"three": "./build/three.module.js",
 				"three/addons/": "./jsm/",
 				"three/nodes": "./jsm/nodes/Nodes.js"			
-	
-
 			}
 		}
 	</script>
@@ -50,9 +48,10 @@
 		//TextS
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { Color } from 'three';
-		let groupText, textMesh1, textMesh2, textGeo, materials;
-		let text = 'HAPPY NEW \nYEAR  2023',
+import { AmbientLight } from 'three';
+
+		let textMesh1, textMesh2, textGeo, materials;
+		let text = 'HAPPY NEW \n YEAR  2023',
 			bevelEnabled = true,
 			font = undefined,
 			fontName = 'optimer', // helvetiker, optimer, gentilis, droid sans, droid serif
@@ -61,9 +60,7 @@ import { Color } from 'three';
 		const height = 0.0001,
 			size = 0.25,
 			hover = 0,
-
 			curveSegments = 4,
-
 			bevelThickness = 0.04,
 			bevelSize = 0.015;
 
@@ -82,7 +79,8 @@ import { Color } from 'three';
 		const tempMatrix = new THREE.Matrix4();
 
 		let group;
-		let cool;
+		let balloon,star,snow;
+
 		init();
 		animate();
 
@@ -115,25 +113,42 @@ import { Color } from 'three';
 
 			//text
 			//ModelS
-   //         const loader = new GLTFLoader().setPath('models/newyear/gltf/air_balloons/'); //const loader = new GLTFLoader().setPath('models/newyear/gltf/balloon/');
+   //         const loader = new GLTFLoader().setPath('models/newyear/gltf/star/');
    //         loader.load('scene.gltf', function (gltf) {
-   //             scene.add(gltf.scene);
+			//	scene.add(gltf.scene);
 			//});
 
             // model
             fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
-				cool = object;
+                balloon = object;
                 object.scale.setScalar(getRandomFloat(0.35, 0.6));
 				object.position.x = 0;
 				scene.add(object);
+			});
+
+            fbxLoader = new FBXLoader();
+			fbxLoader.load('models/newyear/fbx/gold-star/source/gold star.fbx', function (object) {
+                star = object;
+				object.scale.setScalar(0.0001);
+                object.position.x = 1;
+
+                scene.add(object);
+			});
+
+            fbxLoader = new FBXLoader();
+			fbxLoader.load('models/newyear/fbx/snowflake/Snowflake.fbx', function (object) {
+				snow = object;
+               object.scale.setScalar(0.0005);
+                object.position.x = 0;
+
+                scene.add(object);
 			});
 
 			//model
 			const geometries = [
 				new THREE.ConeGeometry(0.2, 0.2, 64),
 				new THREE.IcosahedronGeometry(0.2, 8)
-				//new THREE.TorusGeometry(0.2, 0.04, 64, 32)
 			];
 
 			for (let i = 0; i < 50; i++) {
@@ -162,30 +177,9 @@ import { Color } from 'three';
                     object.name = i;
                     group.add(object);
 				}
-				else {					
-                    const materialFbx = new THREE.MeshStandardMaterial({
-						color: Math.random() * 0x6Effff,
-						opacity: 0.6,
-						transparent: true,
-                        roughness: 0.7,
-                        metalness: 0.0
-					});
-
-                    fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
-						const newObject = cool.clone();
-                        newObject.position.x = i * 0.1;
-                        newObject.position.x = Math.random() * 4 - 2;
-                        newObject.position.y = Math.random() * 4 - 2;
-                        newObject.position.z = Math.random() * 4 - 2;
-
-                        newObject.rotation.x = Math.random() * 2 * Math.PI;
-                        newObject.rotation.y = Math.random() * 2 * Math.PI;
-
-                        newObject.scale.setScalar(getRandomFloat(0.2,0.7));
-						newObject.children[1].material = materialFbx;
-						newObject.name = i+"_obj";
-                        group.add(newObject);
-                    });
+				else {
+					let randomValue = Math.floor(getRandomFloat(0, 3));
+					createClones(randomValue, i);
                 }
 			}
 			//
@@ -200,7 +194,6 @@ import { Color } from 'three';
 			document.body.appendChild(ARButton.createButton(renderer));
 
 			// controllers
-
 			controller1 = renderer.xr.getController(0);
 			controller1.addEventListener('selectstart', onSelectStart);
 			controller1.addEventListener('selectend', onSelectEnd);
@@ -213,10 +206,77 @@ import { Color } from 'three';
 
 			raycaster = new THREE.Raycaster();
 
-
 			window.addEventListener('resize', onWindowResize);
-
 		}
+
+		function createClones(value, i) {
+			switch (value) {
+				case 0:
+                    const materialFbx = new THREE.MeshStandardMaterial({
+                        color: Math.random() * 0x6Effff,
+                        opacity: 0.6,
+                        transparent: true,
+                        roughness: 0.7,
+                        metalness: 0.0
+                    });
+
+                    fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
+                        const newObject = balloon.clone();
+                        newObject.position.x = i * 0.1;
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.x = Math.random() * 2 * Math.PI;
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(getRandomFloat(0.2, 0.7));
+                        newObject.children[1].material = materialFbx;
+                        newObject.name = i + "_ball_obj";
+                        group.add(newObject);
+                    });
+					break;
+				case 1:
+					fbxLoader.load('models/newyear/fbx/gold-star/source/gold star.fbx', function (object) {
+						const newObject = star.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+						newObject.position.y = Math.random() * 4 - 2;
+						newObject.position.z = Math.random() * 4 - 2;
+
+						newObject.rotation.x = Math.random() * 2 * Math.PI;
+						newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+						newObject.scale.setScalar(0.0001);
+						newObject.name = i + "_star_obj";
+						group.add(newObject);
+					});
+					break;
+				case 2:
+                    const snowFbx = new THREE.MeshStandardMaterial({
+                        color: Math.random() * 0x6Effff,
+                        opacity: 0.6,
+                        transparent: true,
+                        roughness: 0.7,
+                        metalness: 0.0
+					});
+
+                    fbxLoader.load('models/newyear/fbx/snowflake/Snowflake.fbx', function (object) {
+                        const newObject = snow.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.x = Math.random() * 2 * Math.PI;
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+						newObject.scale.setScalar(0.0008);
+                        newObject.children[0].material = snowFbx;
+                        newObject.name = i + "_snow_obj";
+                        group.add(newObject);
+                    });
+					break;
+            }
+        }
 
 		function onWindowResize() {
 
@@ -224,7 +284,6 @@ import { Color } from 'three';
 			camera.updateProjectionMatrix();
 
 			renderer.setSize(window.innerWidth, window.innerHeight);
-
 		}
 
 		function onSelectStart(event) {
@@ -242,9 +301,7 @@ import { Color } from 'three';
 				controller.attach(object);
 
 				controller.userData.selected = object;
-
 			}
-
 		}
 
 		function onSelectEnd(event) {
@@ -258,10 +315,7 @@ import { Color } from 'three';
 				group.attach(object);
 
 				controller.userData.selected = undefined;
-
 			}
-
-
 		}
 
 		function getIntersections(controller) {
@@ -272,13 +326,10 @@ import { Color } from 'three';
 			raycaster.ray.direction.set(0, 0, - 1).applyMatrix4(tempMatrix);
 
 			return raycaster.intersectObjects(group.children, false);
-
 		}
 
 		function intersectObjects(controller) {
-
 			// Do not highlight when already selected
-
 			if (controller.userData.selected !== undefined) return;
 
 			const intersections = getIntersections(controller);
@@ -290,9 +341,7 @@ import { Color } from 'three';
 				const object = intersection.object;
 				object.material.emissive.r = 1;
 				intersected.push(object);
-
 			}
-
 		}
 
 		function cleanIntersected() {
@@ -301,9 +350,7 @@ import { Color } from 'three';
 
 				const object = intersected.pop();
 				object.material.emissive.r = 0;
-
 			}
-
 		}
 
 		//
@@ -311,7 +358,6 @@ import { Color } from 'three';
 		function animate() {
 
 			renderer.setAnimationLoop(render);
-
 		}
 
 		function render() {
@@ -322,7 +368,6 @@ import { Color } from 'three';
 			intersectObjects(controller2);
 
 			renderer.render(scene, camera);
-
 		}
 
 		//TextS
@@ -334,13 +379,10 @@ import { Color } from 'three';
 				font = response;
 
 				refreshText();
-
 			});
-
 		}
 
 		function createText() {
-
 			materials = [
 				new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true }), // front
 				new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
@@ -389,9 +431,7 @@ import { Color } from 'three';
 				textMesh2.name = "textmesh2";
 
 				group.add(textMesh2);
-
 			}
-
 		}
 
 
@@ -404,7 +444,6 @@ import { Color } from 'three';
 			if (!text) return;
 
 			createText();
-
 		}
 
 						//Text
