@@ -9,7 +9,8 @@ body {
 }
 
 a {
-	color: #ff0;
+	/*color: #ff0;*/
+	color: #00ffd7;
 	text-decoration: none;
 }
 
