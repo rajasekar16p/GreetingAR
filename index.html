@@ -300,7 +300,7 @@ import { Color } from 'three';
 
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-						newObject.scale.setScalar(0.0001);
+						newObject.scale.setScalar(getRandomFloat(0.00008, 0.0001));
 						newObject.name = i + "_star_obj";
 						group.add(newObject);
 					});
@@ -314,7 +314,7 @@ import { Color } from 'three';
 
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-						newObject.scale.setScalar(0.001);
+                        newObject.scale.setScalar(getRandomFloat(0.00075, 0.001));
 
                         newObject.name = i + "_bell1_obj";
 						group.add(newObject);
@@ -328,7 +328,7 @@ import { Color } from 'three';
 
                         newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-                        newObject.scale.setScalar(0.015);
+                        newObject.scale.setScalar(getRandomFloat(0.010, 0.015)); 
 
                         newObject.name = i + "_bell2_obj";
                         group.add(newObject);
