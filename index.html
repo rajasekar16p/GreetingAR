@@ -50,6 +50,7 @@
 		//TextS
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import { Color } from 'three';
 
 		let textMesh1, textMesh2, textGeo, textMaterials;
 		let text = 'HAPPY NEW \n YEAR  2023',
@@ -89,6 +90,11 @@
 
 		let group;
 		let balloon, star, snow, bell1, bell2;
+
+        const API = {
+            background_color: 0x000000 // sRGB
+        };
+
 
 		init();
 		animate();
@@ -227,6 +233,17 @@
 			scene.add(controller2);
 
 			raycaster = new THREE.Raycaster();
+
+            const gui = new GUI();
+
+            gui.addColor(API, 'background_color')
+                .listen()
+				.onChange(function () {
+					scene.background = new THREE.Color(API.background_color);//.convertSRGBToLinear();
+                    //mesh.material.color.set(API.background-color).convertSRGBToLinear();
+                    render();
+
+                });
 
 
 			window.addEventListener('resize', onWindowResize);
