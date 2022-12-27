@@ -92,13 +92,18 @@ import { Color } from 'three';
 		let balloon, star, snow, bell1, bell2;
 
         const API = {
-            background_color: 0x000000 // sRGB
+			background_color: 0x000000,
+            background_AR: function () {
+				RemoveBackground();
+            }// sRGB
         };
 
 
 		init();
 		animate();
 		animateParticles();
+
+
 		function init() {
 
 			container = document.createElement('div');
@@ -243,7 +248,15 @@ import { Color } from 'three';
                     //mesh.material.color.set(API.background-color).convertSRGBToLinear();
                     render();
 
-                });
+				});
+			//gui.add({ enabled: false }, 'enabled')
+   //             .name('Show Background')
+   //             .onChange(value => {
+			//		scene.background = null;                 
+   //                 render();
+
+   //             });
+            gui.add(API, 'background_AR');
 
 
 			window.addEventListener('resize', onWindowResize);
@@ -530,7 +543,6 @@ import { Color } from 'three';
 			return Math.random() * (max - min) + min;
 		}
 
-
         function createParticleSystems() {
             // Load the texture that will be used to display our snow
             const textureLoader = new THREE.TextureLoader();
@@ -608,8 +620,13 @@ import { Color } from 'three';
                 particleSystems.push(particleSystem);
             }
             return particleSystems;
-        }
+		}
 
+        function RemoveBackground() {
+            API.background_color = 0x000000;
+			scene.background = null;
+            render();
+        }
 	</script>
 </body>
 </html>
