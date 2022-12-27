@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<!--<title>Happy New Year 2023 - Aatral</title>-->
-	  <title>Adiós 2022! Hola 2023!</title>
+	<title>Happy New Year 2023 - Aatral</title>
+	<!--<title>Adiós 2022! Hola 2023!</title>-->
 
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -46,13 +46,13 @@
 		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 		import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
-        import Stats from 'three/addons/libs/stats.module.js';
-        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+		import Stats from 'three/addons/libs/stats.module.js';
+		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 		//TextS
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { Color } from 'three';
+		import { Color } from 'three';
 
 		let textMesh1, textMesh2, textGeo, textMaterials;
 		let text = 'HAPPY NEW \n YEAR  2023',
@@ -72,12 +72,12 @@ import { Color } from 'three';
 
 		let fbxLoader;
 
-		let stats,parameters;
-        const materials = [];
-        let mouse = { X: 0, Y: 0 };
+		let stats, parameters;
+		const materials = [];
+		let mouse = { X: 0, Y: 0 };
 
-        let windowHalfX = window.innerWidth / 2;
-        let windowHalfY = window.innerHeight / 2;
+		let windowHalfX = window.innerWidth / 2;
+		let windowHalfY = window.innerHeight / 2;
 
 		//Text
 
@@ -93,12 +93,12 @@ import { Color } from 'three';
 		let group;
 		let balloon, star, snow, bell1, bell2;
 
-        const API = {
+		const API = {
 			background_color: 0x000000,
-            background_AR: function () {
+			background_AR: function () {
 				RemoveBackground();
-            }// sRGB
-        };
+			}// sRGB
+		};
 
 
 		init();
@@ -112,10 +112,10 @@ import { Color } from 'three';
 			document.body.appendChild(container);
 
 			scene = new THREE.Scene();
-          //  scene.background = new THREE.Color(0x56A2FF); //Enable for background
+			//  scene.background = new THREE.Color(0x56A2FF); //Enable for background
 
 			//camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
 			camera.position.set(0, 0, 3);
 
 			const controls = new OrbitControls(camera, container);
@@ -166,23 +166,23 @@ import { Color } from 'three';
 				scene.add(object);
 			});
 
-            fbxLoader = new FBXLoader();
+			fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
 				bell1 = object;
-                //object.scale.setScalar(0.001);
+				//object.scale.setScalar(0.001);
 
-            });
+			});
 
-            fbxLoader = new FBXLoader();
+			fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
-                bell2 = object;
-    //            object.scale.setScalar(0.025);
+				bell2 = object;
+				//            object.scale.setScalar(0.025);
 
 			});
 
 			//model
 			const geometries = [
-				new THREE.ConeGeometry(0.2, 0.2, 64),
+				//new THREE.ConeGeometry(0.2, 0.2, 64),
 				new THREE.IcosahedronGeometry(0.2, 8)
 			];
 
@@ -241,43 +241,43 @@ import { Color } from 'three';
 
 			raycaster = new THREE.Raycaster();
 
-            const gui = new GUI();
+			const gui = new GUI();
 
-            gui.addColor(API, 'background_color')
-                .listen()
+			gui.addColor(API, 'background_color')
+				.listen()
 				.onChange(function () {
 					scene.background = new THREE.Color(API.background_color);//.convertSRGBToLinear();
-                    //mesh.material.color.set(API.background-color).convertSRGBToLinear();
-                    render();
+					//mesh.material.color.set(API.background-color).convertSRGBToLinear();
+					render();
 
 				});
 			//gui.add({ enabled: false }, 'enabled')
-   //             .name('Show Background')
-   //             .onChange(value => {
-			//		scene.background = null;                 
-   //                 render();
+			//             .name('Show Background')
+			//             .onChange(value => {
+			//		scene.background = null;
+			//                 render();
 
-   //             });
-            gui.add(API, 'background_AR');
+			//             });
+			gui.add(API, 'background_AR');
 
 
 			window.addEventListener('resize', onWindowResize);
 		}
-        function initateSnowParticles() {
-            scene.fog = new THREE.FogExp2(0x000000, 0.0008);
+		function initateSnowParticles() {
+			scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
-            const particleSystems = createParticleSystems();
+			const particleSystems = createParticleSystems();
 
-            // Add particleSystems to scene
-            for (let i = 0; i < particleSystems.length; i++) {
-                scene.add(particleSystems[i]);
-            }
+			// Add particleSystems to scene
+			for (let i = 0; i < particleSystems.length; i++) {
+				scene.add(particleSystems[i]);
+			}
 
-            // Showing stats
-            stats = new Stats();
-            document.body.appendChild(stats.dom);
+			// Showing stats
+			stats = new Stats();
+			document.body.appendChild(stats.dom);
 
-        }
+		}
 
 		function createClones(value, i) {
 			switch (value) {
@@ -321,33 +321,33 @@ import { Color } from 'three';
 					});
 					break;
 				case 2:
-                    fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
+					fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
 						const newObject = bell1.clone();
-                        newObject.position.x = Math.random() * 4 - 2;
-                        newObject.position.y = Math.random() * 4 - 2;
-                        newObject.position.z = Math.random() * 4 - 2;
+						newObject.position.x = Math.random() * 4 - 2;
+						newObject.position.y = Math.random() * 4 - 2;
+						newObject.position.z = Math.random() * 4 - 2;
 
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-                        newObject.scale.setScalar(getRandomFloat(0.00075, 0.001));
+						newObject.scale.setScalar(getRandomFloat(0.00075, 0.001));
 
-                        newObject.name = i + "_bell1_obj";
+						newObject.name = i + "_bell1_obj";
 						group.add(newObject);
 					});
-                case 3:
-                    fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
-                        const newObject = bell2.clone();
-                        newObject.position.x = Math.random() * 4 - 2;
-                        newObject.position.y = Math.random() * 4 - 2;
-                        newObject.position.z = Math.random() * 4 - 2;
+				case 3:
+					fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
+						const newObject = bell2.clone();
+						newObject.position.x = Math.random() * 4 - 2;
+						newObject.position.y = Math.random() * 4 - 2;
+						newObject.position.z = Math.random() * 4 - 2;
 
-                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-                        newObject.scale.setScalar(getRandomFloat(0.010, 0.015)); 
+						newObject.scale.setScalar(getRandomFloat(0.010, 0.015));
 
-                        newObject.name = i + "_bell2_obj";
-                        group.add(newObject);
-                    });
+						newObject.name = i + "_bell2_obj";
+						group.add(newObject);
+					});
 			}
 		}
 
@@ -430,38 +430,38 @@ import { Color } from 'three';
 			renderer.setAnimationLoop(render);
 		}
 
-        function animateParticles() {
-            // This will create a loop rendering at each frame
-            requestAnimationFrame(animateParticles);
-            render();
-            stats.update();
+		function animateParticles() {
+			// This will create a loop rendering at each frame
+			requestAnimationFrame(animateParticles);
+			render();
+			stats.update();
 		}
 
 		function render() {
 			//ParticlesStart
-            const time = Date.now() * 0.00005;
+			const time = Date.now() * 0.00005;
 
-            for (let i = 0; i < scene.children.length; i++) {
-                const object = scene.children[i];
+			for (let i = 0; i < scene.children.length; i++) {
+				const object = scene.children[i];
 
-                if (object instanceof THREE.Points) {
-                    object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
-                }
-            }
+				if (object instanceof THREE.Points) {
+					object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+				}
+			}
 
-            for (let i = 0; i < materials.length; i++) {
-                const color = parameters[i][0];
-                const h = (360 * ((color[0] + time) % 360)) / 360;
-                materials[i].color.setHSL(h, color[1], color[2]);
-            }
+			for (let i = 0; i < materials.length; i++) {
+				const color = parameters[i][0];
+				const h = (360 * ((color[0] + time) % 360)) / 360;
+				materials[i].color.setHSL(h, color[1], color[2]);
+			}
 			//Particles end
 			cleanIntersected();
 
 			intersectObjects(controller1);
 			intersectObjects(controller2);
 
-            renderer.render(scene, camera);
-        }
+			renderer.render(scene, camera);
+		}
 
 
 		//TextS
@@ -500,7 +500,7 @@ import { Color } from 'three';
 
 			const centerOffset = - 0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
 
-            textMesh1 = new THREE.Mesh(textGeo, textMaterials);
+			textMesh1 = new THREE.Mesh(textGeo, textMaterials);
 
 			textMesh1.position.x = centerOffset;
 			textMesh1.position.y = hover;
@@ -514,7 +514,7 @@ import { Color } from 'three';
 
 			if (mirror) {
 
-                textMesh2 = new THREE.Mesh(textGeo, textMaterials);
+				textMesh2 = new THREE.Mesh(textGeo, textMaterials);
 
 				textMesh2.position.x = centerOffset;
 				textMesh2.position.y = - hover;
@@ -527,8 +527,6 @@ import { Color } from 'three';
 				group.add(textMesh2);
 			}
 		}
-
-
 
 		function refreshText() {
 
@@ -545,90 +543,90 @@ import { Color } from 'three';
 			return Math.random() * (max - min) + min;
 		}
 
-        function createParticleSystems() {
-            // Load the texture that will be used to display our snow
-            const textureLoader = new THREE.TextureLoader();
+		function createParticleSystems() {
+			// Load the texture that will be used to display our snow
+			const textureLoader = new THREE.TextureLoader();
 
-            const sprite1 = textureLoader.load(
-                "./textures/sprites/snowflake1.png"
-            );
-            const sprite2 = textureLoader.load(
-                "./textures/sprites/snowflake2.png"
-            );
-            const sprite3 = textureLoader.load(
-                "./textures/sprites/snowflake3.png"
-            );
-            const sprite4 = textureLoader.load(
-                "./textures/sprites/snowflake4.png"
-            );
-            const sprite5 = textureLoader.load(
-                "./textures/sprites/snowflake5.png"
-            );
+			const sprite1 = textureLoader.load(
+				"./textures/sprites/snowflake1.png"
+			);
+			const sprite2 = textureLoader.load(
+				"./textures/sprites/snowflake2.png"
+			);
+			const sprite3 = textureLoader.load(
+				"./textures/sprites/snowflake3.png"
+			);
+			const sprite4 = textureLoader.load(
+				"./textures/sprites/snowflake4.png"
+			);
+			const sprite5 = textureLoader.load(
+				"./textures/sprites/snowflake5.png"
+			);
 
-            // Create the geometry that will hold all our vertices
-            const geometry = new THREE.BufferGeometry();
-            const vertices = [];
-            const particleSystems = [];
+			// Create the geometry that will hold all our vertices
+			const geometry = new THREE.BufferGeometry();
+			const vertices = [];
+			const particleSystems = [];
 
-            // create the vertices and add store them in our vertices array
-            for (let i = 0; i < 10000; i++) {
-                const x = Math.random() * 2000 - 1000; // generate random number between -1000 to 1000
-                const y = Math.random() * 2000 - 1000;
-                const z = Math.random() * 2000 - 1000;
+			// create the vertices and add store them in our vertices array
+			for (let i = 0; i < 10000; i++) {
+				const x = Math.random() * 2000 - 1000; // generate random number between -1000 to 1000
+				const y = Math.random() * 2000 - 1000;
+				const z = Math.random() * 2000 - 1000;
 
-                vertices.push(x, y, z);
-            }
+				vertices.push(x, y, z);
+			}
 
-            // Add the vertices stored in our array to set
-            // the position attribute of our geometry.
-            // Position attribute will be read by threejs
-            geometry.setAttribute(
-                "position",
-                new THREE.Float32BufferAttribute(vertices, 3)
-            );
+			// Add the vertices stored in our array to set
+			// the position attribute of our geometry.
+			// Position attribute will be read by threejs
+			geometry.setAttribute(
+				"position",
+				new THREE.Float32BufferAttribute(vertices, 3)
+			);
 
-            parameters = [
-                [[1.0, 0.2, 0.5], sprite2, 20],
-                [[0.95, 0.2, 0.5], sprite3, 15],
-                [[0.9, 0.2, 0.5], sprite1, 10],
-                [[0.85, 0.2, 0.5], sprite5, 8],
-                [[0.8, 0.2, 0.5], sprite4, 5],
-            ];
+			parameters = [
+				[[1.0, 0.2, 0.5], sprite2, 20],
+				[[0.95, 0.2, 0.5], sprite3, 15],
+				[[0.9, 0.2, 0.5], sprite1, 10],
+				[[0.85, 0.2, 0.5], sprite5, 8],
+				[[0.8, 0.2, 0.5], sprite4, 5],
+			];
 
-            for (let i = 0; i < parameters.length; i++) {
-                const color = parameters[i][0];
-                const sprite = parameters[i][1];
-                const size = parameters[i][2];
+			for (let i = 0; i < parameters.length; i++) {
+				const color = parameters[i][0];
+				const sprite = parameters[i][1];
+				const size = parameters[i][2];
 
-                // Create the material that will be used to render each vertex of our geometry
-                materials[i] = new THREE.PointsMaterial({
-                    size,
-                    map: sprite,
-                    blending: THREE.AdditiveBlending,
-                    depthTest: false,
-                    transparent: true,
-                });
-                materials[i].color.setHSL(color[0], color[1], color[2]);
+				// Create the material that will be used to render each vertex of our geometry
+				materials[i] = new THREE.PointsMaterial({
+					size,
+					map: sprite,
+					blending: THREE.AdditiveBlending,
+					depthTest: false,
+					transparent: true,
+				});
+				materials[i].color.setHSL(color[0], color[1], color[2]);
 
-                // Create the particle system
-                const particleSystem = new THREE.Points(geometry, materials[i]);
+				// Create the particle system
+				const particleSystem = new THREE.Points(geometry, materials[i]);
 
-                /* Offset the particle system x, y, z to different random points to break
-                uniformity in the direction of movement during animation */
-                particleSystem.rotation.x = Math.random() * 6;
-                particleSystem.rotation.y = Math.random() * 6;
-                particleSystem.rotation.z = Math.random() * 6;
+				/* Offset the particle system x, y, z to different random points to break
+				uniformity in the direction of movement during animation */
+				particleSystem.rotation.x = Math.random() * 6;
+				particleSystem.rotation.y = Math.random() * 6;
+				particleSystem.rotation.z = Math.random() * 6;
 
-                particleSystems.push(particleSystem);
-            }
-            return particleSystems;
+				particleSystems.push(particleSystem);
+			}
+			return particleSystems;
 		}
 
-        function RemoveBackground() {
-            API.background_color = 0x000000;
+		function RemoveBackground() {
+			API.background_color = 0x000000;
 			scene.background = null;
-            render();
-        }
+			render();
+		}
 	</script>
 </body>
 </html>
@@ -637,8 +635,8 @@ import { Color } from 'three';
 <!--To do:
 Check if ar support, else add scene background
 Add wisher name
-add bells
+add bells - done
 Add start - done
-add snow - done	
-	
+add snow - done
+	reduce snow speed
 	-->
