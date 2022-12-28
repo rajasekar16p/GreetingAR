@@ -129,7 +129,9 @@
 				isAudioPlaying = true;
                 AudioPlayer();
             }
-        };
+		};
+
+		let particleSpriteLocation = "./textures/sprites/snowflake/";
 
 		init();
 		animate();
@@ -598,19 +600,19 @@
 			const textureLoader = new THREE.TextureLoader();
 
 			const sprite1 = textureLoader.load(
-				"./textures/sprites/snowflake1.png"
+				particleSpriteLocation + "particle1.png"
 			);
 			const sprite2 = textureLoader.load(
-				"./textures/sprites/snowflake2.png"
+                particleSpriteLocation + "particle2.png"
 			);
 			const sprite3 = textureLoader.load(
-				"./textures/sprites/snowflake3.png"
+                particleSpriteLocation + "particle3.png"
 			);
 			const sprite4 = textureLoader.load(
-				"./textures/sprites/snowflake4.png"
+                particleSpriteLocation + "particle4.png"
 			);
 			const sprite5 = textureLoader.load(
-				"./textures/sprites/snowflake5.png"
+                particleSpriteLocation + "particle5.png"
 			);
 
 			// Create the geometry that will hold all our vertices
