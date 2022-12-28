@@ -54,12 +54,13 @@
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 		import { AmbientLight } from 'three';
+        import { TTFLoader } from 'three/addons/loaders/TTFLoader.js';
 
 		let textMesh1, textMesh2, textGeo, textMaterials;
 		let text = 'HAPPY NEW \n YEAR  2023',
 			bevelEnabled = true,
 			font = undefined,
-			fontName = 'optimer', // helvetiker, optimer, gentilis, droid sans, droid serif
+            fontName = 'gentilis', // helvetiker, optimer, gentilis, droid sans, droid serif
 			fontWeight = 'bold'; // normal bold
 
 		const height = 0.0001,
@@ -343,7 +344,6 @@
 						newObject.position.y = Math.random() * 4 - 2;
 						newObject.position.z = Math.random() * 8 - 4;
 						//newObject.position.z = Math.random() * (i < 25 ? i + 1 : -(i - 25));
-						console.log(newObject.position.z);
 						newObject.rotation.x = Math.random() * 2 * Math.PI;
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
@@ -543,6 +543,16 @@
 
 				refreshText();
 			});
+
+
+   //         const loader = new TTFLoader();
+
+   //         loader.load('fonts/ttf/ChRisTmAs KiTcHeN.ttf', function (json) {
+
+   //             font = new FontLoader(json);
+   //             refreshText();
+			//});
+
 		}
 
 		//Creates the new year text model
