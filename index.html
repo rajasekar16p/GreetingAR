@@ -52,7 +52,7 @@
 		//TextS
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-		import { Color } from 'three';
+import { AmbientLight } from 'three';
 
 		let textMesh1, textMesh2, textGeo, textMaterials;
 		let text = 'HAPPY NEW \n YEAR  2023',
@@ -92,14 +92,29 @@
 
 		let group;
 		let balloon, star, snow, bell1, bell2;
-
+		let colorThemeSelection = 0;
 		const API = {
 			background_color: 0x000000,
+			changeColor: function () {
+				ChangeBackgroundColor();
+            },
 			background_AR: function () {
 				RemoveBackground();
-			}// sRGB
+			},
+			changeTheme: function () {
+				ChangeTheme();
+            }
 		};
 
+		const ColorPalatte = {
+			patetteId: 0,
+            background_color: 0x000000,
+			primary_color: 0x000000,
+			secondary_color: 0x000000,
+            text3dForegroundColor: 0x000000,
+            text3dSideColor: 0x000000,
+            other_color: [0x000000, 0x000000, 0x000000, 0x000000]
+        }
 
 		init();
 		animate();
@@ -110,6 +125,8 @@
 
 			container = document.createElement('div');
 			document.body.appendChild(container);
+
+            ColorThemeSetter(colorThemeSelection);//Set color there to 0
 
 			scene = new THREE.Scene();
 			//  scene.background = new THREE.Color(0x56A2FF); //Enable for background
@@ -127,6 +144,8 @@
 			const light = new THREE.DirectionalLight(0xffffff);
 			light.position.set(0, 6, 0);
 			scene.add(light);
+            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+            scene.add(ambientLight);
 
 			group = new THREE.Group();
 			scene.add(group);
@@ -152,16 +171,18 @@
 			fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
 				balloon = object;
-				object.scale.setScalar(getRandomFloat(0.35, 0.6));
-				object.position.x = 0;
-				scene.add(object);
+				//object.scale.setScalar(getRandomFloat(0.35, 0.6));
+				//object.position.z = -1;
+				//scene.add(object);
 			});
 
 			fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/gold-star/source/gold star.fbx', function (object) {
 				star = object;
 				object.scale.setScalar(0.0001);
-				object.position.x = 1;
+				object.position.x = 0;
+				object.position.y = 0.5;
+				object.position.z = -1;
 
 				scene.add(object);
 			});
@@ -170,14 +191,12 @@
 			fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
 				bell1 = object;
 				//object.scale.setScalar(0.001);
-
 			});
 
 			fbxLoader = new FBXLoader();
 			fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
 				bell2 = object;
 				//            object.scale.setScalar(0.025);
-
 			});
 
 			//model
@@ -191,7 +210,8 @@
 
 					const geometry = geometries[Math.floor(Math.random() * geometries.length)];
 					const material = new THREE.MeshStandardMaterial({
-						color: Math.random() * 0xffffff,
+						//color: Math.random() * 0xffffff,
+                        color: getRandomBalloonColor(),
 						opacity: 0.75,
 						transparent: true,
 						roughness: 0.7,
@@ -213,7 +233,7 @@
 					group.add(object);
 				}
 				else {
-					let randomValue = Math.floor(getRandomFloat(0, 4));
+					let randomValue = Math.floor(getRandomFloat(0, 1));
 					createClones(randomValue, i);
 				}
 			}
@@ -258,11 +278,13 @@
 			//                 render();
 
 			//             });
-			gui.add(API, 'background_AR');
-
+            gui.add(API, 'background_AR').name('AR Background');
+			gui.add(API, 'changeColor').name('Change background color');
+			gui.add(API, 'changeTheme').name('Change Theme -Temp');
 
 			window.addEventListener('resize', onWindowResize);
 		}
+
 		function initateSnowParticles() {
 			scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
@@ -283,11 +305,12 @@
 			switch (value) {
 				case 0:
 					const materialFbx = new THREE.MeshStandardMaterial({
-						color: Math.random() * 0x6Effff,
-						opacity: 0.6,
+						//color: Math.random() * 0x6Effff,
+						color: getRandomBalloonColor(),
+						opacity: 0.9,
 						transparent: true,
-						roughness: 0.7,
-						metalness: 0.0
+						roughness: 0.5,
+						metalness: 0.1
 					});
 
 					fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
@@ -412,8 +435,11 @@
 				const intersection = intersections[0];
 
 				const object = intersection.object;
-				object.material.emissive.r = 1;
-				intersected.push(object);
+				if (object.material.emissive != null) {
+                    object.material.emissive.r = 1;
+                    intersected.push(object);
+                }
+
 			}
 		}
 
@@ -439,7 +465,8 @@
 
 		function render() {
 			//ParticlesStart
-			const time = Date.now() * 0.00005;
+			//const time = Date.now() * 0.00005;
+			const time = Date.now() * 0.00002;
 
 			for (let i = 0; i < scene.children.length; i++) {
 				const object = scene.children[i];
@@ -447,6 +474,10 @@
 				if (object instanceof THREE.Points) {
 					object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
 				}
+			}
+            for (let i = 0; i < group.children.length; i++) {
+                const object = group.children[i];
+                object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
 			}
 
 			for (let i = 0; i < materials.length; i++) {
@@ -477,9 +508,13 @@
 		}
 
 		function createText() {
+			//textMaterials = [
+			//	new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true }), // front
+			//	new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
+			//];
 			textMaterials = [
-				new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true }), // front
-				new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
+				new THREE.MeshPhongMaterial({ color: ColorPalatte.text3dForegroundColor, flatShading: true }), // front
+				new THREE.MeshPhongMaterial({ color: ColorPalatte.text3dSideColor }) // side
 			];
 
 			textGeo = new TextGeometry(text, {
@@ -504,13 +539,14 @@
 
 			textMesh1.position.x = centerOffset;
 			textMesh1.position.y = hover;
-			textMesh1.position.z = 0;
+			textMesh1.position.z = -1;
 
 			textMesh1.rotation.x = 0;
 			textMesh1.rotation.y = Math.PI * 2;
 
 			textMesh1.name = "textmesh1";
-			group.add(textMesh1);
+			//group.add(textMesh1);
+            scene.add(textMesh1);
 
 			if (mirror) {
 
@@ -524,7 +560,7 @@
 				textMesh2.rotation.y = Math.PI * 2;
 				textMesh2.name = "textmesh2";
 
-				group.add(textMesh2);
+				//group.add(textMesh2);
 			}
 		}
 
@@ -541,6 +577,13 @@
 		//Text
 		function getRandomFloat(min, max) {
 			return Math.random() * (max - min) + min;
+		}
+
+		function getRandomBalloonColor() {
+			const randomVal = Math.floor(getRandomFloat(0, 4));
+			const color = ColorPalatte.other_color[randomVal];
+			//const color = Math.random() * 0x4CAAFF;
+			return color;
 		}
 
 		function createParticleSystems() {
@@ -627,7 +670,55 @@
 			scene.background = null;
 			render();
 		}
+
+		function ChangeBackgroundColor() {
+			const h = Math.floor(getRandomFloat(0, 360));
+			const newColor = "hsl(" + h + ", 100%, 15%)";
+
+			API.background_color = new THREE.Color(newColor);
+            scene.background = API.background_color;
+			render();
+		}
+
+		function ColorThemeSetter(theme) {
+			switch (theme) {
+				case 0: //Blue white
+					ColorPalatte.patetteId = 0;
+					ColorPalatte.background_color = 0x1d395b;
+					ColorPalatte.primary_color = 0x046ec1;
+					ColorPalatte.secondary_color = 0x24b9eb;
+                    ColorPalatte.text3dForegroundColor = 0x046ec1;
+                    ColorPalatte.text3dSideColor = 0xffffff;
+                    ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
+					break;
+				case 1: //Gold black
+                    ColorPalatte.patetteId = 1;
+                    ColorPalatte.background_color = 0xb28a16;
+                    ColorPalatte.primary_color = 0x010103;
+                    ColorPalatte.secondary_color = 0xb0982b;
+                    ColorPalatte.text3dForegroundColor = 0x010103;
+                    ColorPalatte.text3dSideColor = 0xb28a16;
+					ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
+					break;
+            }
+		}
+
+		function ChangeTheme() {
+			if (ColorPalatte.patetteId == 0) {
+				ColorThemeSetter(1);
+				colorThemeSelection = 1;
+			}
+			else if (ColorPalatte.patetteId == 1) {
+				ColorThemeSetter(0);
+				colorThemeSelection = 0;
+			}
+			scene.remove.apply(scene, scene.children);
+
+			init();
+		}
 	</script>
+
+
 </body>
 </html>
 
@@ -638,5 +729,8 @@ Add wisher name
 add bells - done
 Add start - done
 add snow - done
-	reduce snow speed
+	reduce snow speed - done
+	Move happy new year back - done
+	sound to add  -
+	animate all part- n
 	-->

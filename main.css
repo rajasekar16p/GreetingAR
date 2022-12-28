@@ -100,10 +100,8 @@ a, button, input, select {
 	width: 3rem;
 	height: 3rem;
 	border-radius: 50%;
-	/*box-shadow: 0 4px 16px #626EC9;*/
 	box-shadow: 0 4px 16px #CCCCFF;
-	/*background: #9A96E8 url('textures/aatral_logo_square.jpg') center center / 60% no-repeat;*/
-	background: #FFFFFF url('textures/aatral_logo_square.jpg') center center / 70% no-repeat;
+	background: #FFFFFF url('textures/logo.png') center center / 70% no-repeat;
 	cursor: pointer;
 }
 
