@@ -40,6 +40,7 @@
 	<script type="module">
 
 		import * as THREE from 'three';
+
 		import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 		import { ARButton } from 'three/addons/webxr/ARButton.js';
 
@@ -52,7 +53,7 @@
 		//TextS
 		import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 		import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-import { AmbientLight } from 'three';
+		import { AmbientLight } from 'three';
 
 		let textMesh1, textMesh2, textGeo, textMaterials;
 		let text = 'HAPPY NEW \n YEAR  2023',
@@ -93,28 +94,33 @@ import { AmbientLight } from 'three';
 		let group;
 		let balloon, star, snow, bell1, bell2;
 		let colorThemeSelection = 0;
+		let snowflake = false;
+
 		const API = {
 			background_color: 0x000000,
 			changeColor: function () {
 				ChangeBackgroundColor();
-            },
+			},
 			background_AR: function () {
 				RemoveBackground();
 			},
 			changeTheme: function () {
 				ChangeTheme();
+			},
+			addSnowflakes: function () {
+				snowflake = true;
             }
 		};
 
 		const ColorPalatte = {
 			patetteId: 0,
-            background_color: 0x000000,
+			background_color: 0x000000,
 			primary_color: 0x000000,
 			secondary_color: 0x000000,
-            text3dForegroundColor: 0x000000,
-            text3dSideColor: 0x000000,
-            other_color: [0x000000, 0x000000, 0x000000, 0x000000]
-        }
+			text3dForegroundColor: 0x000000,
+			text3dSideColor: 0x000000,
+			other_color: [0x000000, 0x000000, 0x000000, 0x000000]
+		};
 
 		init();
 		animate();
@@ -126,7 +132,7 @@ import { AmbientLight } from 'three';
 			container = document.createElement('div');
 			document.body.appendChild(container);
 
-            ColorThemeSetter(colorThemeSelection);//Set color there to 0
+			ColorThemeSetter(colorThemeSelection);//Set color there to 0
 
 			scene = new THREE.Scene();
 			//  scene.background = new THREE.Color(0x56A2FF); //Enable for background
@@ -144,13 +150,15 @@ import { AmbientLight } from 'three';
 			const light = new THREE.DirectionalLight(0xffffff);
 			light.position.set(0, 6, 0);
 			scene.add(light);
-            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
-            scene.add(ambientLight);
+			const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+			scene.add(ambientLight);
 
 			group = new THREE.Group();
 			scene.add(group);
 
-			initateSnowParticles();
+			if (snowflake) {
+                initateSnowParticles(); //Enable for snow particles
+            }
 
 			//
 			//Texts
@@ -211,7 +219,7 @@ import { AmbientLight } from 'three';
 					const geometry = geometries[Math.floor(Math.random() * geometries.length)];
 					const material = new THREE.MeshStandardMaterial({
 						//color: Math.random() * 0xffffff,
-                        color: getRandomBalloonColor(),
+						color: getRandomBalloonColor(),
 						opacity: 0.75,
 						transparent: true,
 						roughness: 0.7,
@@ -278,9 +286,15 @@ import { AmbientLight } from 'three';
 			//                 render();
 
 			//             });
-            gui.add(API, 'background_AR').name('AR Background');
+			gui.add(API, 'background_AR').name('AR Background');
 			gui.add(API, 'changeColor').name('Change background color');
 			gui.add(API, 'changeTheme').name('Change Theme -Temp');
+            gui.add(API, 'addSnowflakes').name('Snow');
+
+
+            // Showing stats
+            stats = new Stats();
+			document.body.appendChild(stats.dom);
 
 			window.addEventListener('resize', onWindowResize);
 		}
@@ -295,9 +309,6 @@ import { AmbientLight } from 'three';
 				scene.add(particleSystems[i]);
 			}
 
-			// Showing stats
-			stats = new Stats();
-			document.body.appendChild(stats.dom);
 
 		}
 
@@ -436,9 +447,9 @@ import { AmbientLight } from 'three';
 
 				const object = intersection.object;
 				if (object.material.emissive != null) {
-                    object.material.emissive.r = 1;
-                    intersected.push(object);
-                }
+					object.material.emissive.r = 1;
+					intersected.push(object);
+				}
 
 			}
 		}
@@ -475,9 +486,9 @@ import { AmbientLight } from 'three';
 					object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
 				}
 			}
-            for (let i = 0; i < group.children.length; i++) {
-                const object = group.children[i];
-                object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+			for (let i = 0; i < group.children.length; i++) {
+				const object = group.children[i];
+				object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
 			}
 
 			for (let i = 0; i < materials.length; i++) {
@@ -546,7 +557,7 @@ import { AmbientLight } from 'three';
 
 			textMesh1.name = "textmesh1";
 			//group.add(textMesh1);
-            scene.add(textMesh1);
+			scene.add(textMesh1);
 
 			if (mirror) {
 
@@ -676,7 +687,7 @@ import { AmbientLight } from 'three';
 			const newColor = "hsl(" + h + ", 100%, 15%)";
 
 			API.background_color = new THREE.Color(newColor);
-            scene.background = API.background_color;
+			scene.background = API.background_color;
 			render();
 		}
 
@@ -687,20 +698,20 @@ import { AmbientLight } from 'three';
 					ColorPalatte.background_color = 0x1d395b;
 					ColorPalatte.primary_color = 0x046ec1;
 					ColorPalatte.secondary_color = 0x24b9eb;
-                    ColorPalatte.text3dForegroundColor = 0x046ec1;
-                    ColorPalatte.text3dSideColor = 0xffffff;
-                    ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
+					ColorPalatte.text3dForegroundColor = 0x046ec1;
+					ColorPalatte.text3dSideColor = 0xffffff;
+					ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
 					break;
 				case 1: //Gold black
-                    ColorPalatte.patetteId = 1;
-                    ColorPalatte.background_color = 0xb28a16;
-                    ColorPalatte.primary_color = 0x010103;
-                    ColorPalatte.secondary_color = 0xb0982b;
-                    ColorPalatte.text3dForegroundColor = 0x010103;
-                    ColorPalatte.text3dSideColor = 0xb28a16;
+					ColorPalatte.patetteId = 1;
+					ColorPalatte.background_color = 0xb28a16;
+					ColorPalatte.primary_color = 0x010103;
+					ColorPalatte.secondary_color = 0xb0982b;
+					ColorPalatte.text3dForegroundColor = 0x010103;
+					ColorPalatte.text3dSideColor = 0xb28a16;
 					ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
 					break;
-            }
+			}
 		}
 
 		function ChangeTheme() {
