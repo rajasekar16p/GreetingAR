@@ -95,6 +95,7 @@
 		let balloon, star, snow, bell1, bell2;
 		let colorThemeSelection = 0;
 		let snowflake = false;
+		let isSnowParticleEffect = false;
 
 		const API = {
 			background_color: 0x000000,
@@ -119,7 +120,7 @@
 			secondary_color: 0x000000,
 			text3dForegroundColor: 0x000000,
 			text3dSideColor: 0x000000,
-			other_color: [0x000000, 0x000000, 0x000000, 0x000000]
+			other_color: [0x000000, 0x000000, 0x000000, 0x000000],
 		};
 
 		let isAudioPlaying = false;
@@ -241,9 +242,9 @@
 
 					const object = new THREE.Mesh(geometry, material);
 
-					object.position.x = Math.random() * 4 - 2;
-					object.position.y = Math.random() * 4 - 2;
-					object.position.z = Math.random() * 4 - 2;
+					object.position.x = Math.random() * 8 - 4;
+					object.position.y = Math.random() * 8 - 4;
+					object.position.z = Math.random() * 8 - 4;
 
 					object.rotation.x = Math.random() * 2 * Math.PI;
 					object.rotation.y = Math.random() * 2 * Math.PI;
@@ -311,6 +312,7 @@
 			window.addEventListener('resize', onWindowResize);
 		}
 
+		//Setups the particle system
 		function initateSnowParticles() {
 			scene.fog = new THREE.FogExp2(0x000000, 0.0008);
 
@@ -322,6 +324,7 @@
 			}
 		}
 
+		//Create clone of the loaded models(ballons)
 		function createClones(value, i) {
 			switch (value) {
 				case 0:
@@ -336,11 +339,11 @@
 
 					fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
 						const newObject = balloon.clone();
-						newObject.position.x = i * 0.1;
 						newObject.position.x = Math.random() * 4 - 2;
 						newObject.position.y = Math.random() * 4 - 2;
-						newObject.position.z = Math.random() * 4 - 2;
-
+						newObject.position.z = Math.random() * 8 - 4;
+						//newObject.position.z = Math.random() * (i < 25 ? i + 1 : -(i - 25));
+						console.log(newObject.position.z);
 						newObject.rotation.x = Math.random() * 2 * Math.PI;
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
@@ -482,26 +485,45 @@
 		function render() {
 			//ParticlesStart
 			//const time = Date.now() * 0.00005;
-			const time = Date.now() * 0.00002;
+            let time = Date.now() * 0.00002;
 
-			for (let i = 0; i < scene.children.length; i++) {
-				const object = scene.children[i];
+			if (isSnowParticleEffect) {
+                time = Date.now() * 0.00002;
+				for (let i = 0; i < scene.children.length; i++) {
+					const object = scene.children[i];
 
-				if (object instanceof THREE.Points) {
-					object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+					if (object instanceof THREE.Points) {
+						object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+					}
+				}
+
+				for (let i = 0; i < materials.length; i++) {
+					const color = parameters[i][0];
+					const h = (360 * ((color[0] + time) % 360)) / 360;
+					materials[i].color.setHSL(h, color[1], color[2]);
 				}
 			}
-			for (let i = 0; i < group.children.length; i++) {
-				const object = group.children[i];
-				object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
-			}
+			else {
+                 time = Date.now() * 0.00001;
 
-			for (let i = 0; i < materials.length; i++) {
-				const color = parameters[i][0];
-				const h = (360 * ((color[0] + time) % 360)) / 360;
-				materials[i].color.setHSL(h, color[1], color[2]);
-			}
+                for (let i = 0; i < scene.children.length; i++) {
+                    const object = scene.children[i];
+
+					if (object instanceof THREE.Points) {
+						object.rotation.x = time * (i < 4 ? i + 1 : -(i + 1));
+                        object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+                        object.rotation.z = time * (i < 4 ? i + 1 : -(i + 1));
+                    }
+                }
+            }
 			//Particles end
+
+			//To rotate the 3d models in the group(balloons, stars, sphere etc)
+            for (let i = 0; i < group.children.length; i++) {
+                const object = group.children[i];
+                object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+            }
+
 			cleanIntersected();
 
 			intersectObjects(controller1);
@@ -510,8 +532,8 @@
 			renderer.render(scene, camera);
 		}
 
-
 		//TextS
+		//To load the font
 		function loadFont() {
 
 			const loader = new FontLoader();
@@ -523,6 +545,7 @@
 			});
 		}
 
+		//Creates the new year text model
 		function createText() {
 			//textMaterials = [
 			//	new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true }), // front
@@ -574,6 +597,7 @@
 			}
 		}
 
+		//refresh the text model
 		function refreshText() {
 			group.remove(textMesh1);
 			if (mirror) group.remove(textMesh2);
@@ -584,10 +608,12 @@
 		}
 
 		//Text
+		//Get random float number between two values
 		function getRandomFloat(min, max) {
 			return Math.random() * (max - min) + min;
 		}
 
+		//Returns random color for material from theme color palette
 		function getRandomBalloonColor() {
 			const randomVal = Math.floor(getRandomFloat(0, 4));
 			const color = ColorPalatte.other_color[randomVal];
@@ -595,6 +621,7 @@
 			return color;
 		}
 
+		//Particle system for snow and confetti
 		function createParticleSystems() {
 			// Load the texture that will be used to display our snow
 			const textureLoader = new THREE.TextureLoader();
@@ -689,6 +716,7 @@
 			render();
 		}
 
+		//Color theme setup based on selection
 		function ColorThemeSetter(theme) {
 			switch (theme) {
 				case 0: //Blue white
@@ -699,6 +727,7 @@
 					ColorPalatte.text3dForegroundColor = 0x046ec1;
 					ColorPalatte.text3dSideColor = 0xffffff;
 					ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
+                    particleSpriteLocation = "./textures/sprites/confettiblue/";
 					break;
 				case 1: //Gold black
 					ColorPalatte.patetteId = 1;
@@ -708,10 +737,12 @@
 					ColorPalatte.text3dForegroundColor = 0x010103;
 					ColorPalatte.text3dSideColor = 0xb28a16;
 					ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
+                    particleSpriteLocation = "./textures/sprites/confettigold/";
 					break;
 			}
 		}
 
+		//Change theme of the application
 		function ChangeTheme() {
 			if (ColorPalatte.patetteId == 0) {
 				ColorThemeSetter(1);
@@ -726,6 +757,7 @@
 			init();
 		}
 
+		//Audio player setup and play functionality
 		function AudioPlayer() {
 			// create an AudioListener and add it to the camera
 			const listener = new THREE.AudioListener();
@@ -759,6 +791,8 @@ Add start - done
 add snow - done
 	reduce snow speed - done
 	Move happy new year back - done
-	sound to add  -
-	animate all part- n
+	sound to add  - done
+	animate all part- done
+	fireworks - 
+	confetti - partial
 	-->
