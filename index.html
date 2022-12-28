@@ -94,7 +94,7 @@
 
 		let group;
 		let balloon, star, snow, bell1, bell2;
-		let colorThemeSelection = 0;
+		let colorThemeSelection = 1;
 		let snowflake = true;
 		let isSnowParticleEffect = false;
 
@@ -107,15 +107,19 @@
 				RemoveBackground();
 			},
 			changeTheme: function () {
-				ChangeTheme();
+				openThemePages();
 			},
+            changeColorPalette: function () {
+                ChangeTheme();
+            },
 			addSnowflakes: function () {
 				snowflake = true;
 			}
 		};
 
 		const ColorPalatte = {
-			patetteId: 0,
+			paletteId: 0,
+			paletteName: undefined,
 			background_color: 0x000000,
 			primary_color: 0x000000,
 			secondary_color: 0x000000,
@@ -303,7 +307,8 @@
 			//             });
 			gui.add(API, 'background_AR').name('AR Background');
 			gui.add(API, 'changeColor').name('Change background color');
-			gui.add(API, 'changeTheme').name('Change Theme -Temp');
+            gui.add(API, 'changeColorPalette').name('Change palette -Temp');
+			gui.add(API, 'changeTheme').name('Change Theme');
 			gui.add(API, 'addSnowflakes').name('Snow');
 
 			// Showing stats
@@ -730,17 +735,23 @@
 		function ColorThemeSetter(theme) {
 			switch (theme) {
 				case 0: //Blue white
-					ColorPalatte.patetteId = 0;
+					ColorPalatte.paletteId = 0;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Blue_White";
 					ColorPalatte.background_color = 0x1d395b;
 					ColorPalatte.primary_color = 0x046ec1;
 					ColorPalatte.secondary_color = 0x24b9eb;
 					ColorPalatte.text3dForegroundColor = 0x046ec1;
 					ColorPalatte.text3dSideColor = 0xffffff;
 					ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
-                    particleSpriteLocation = "./textures/sprites/confettiblue/";
+					//particleSpriteLocation = "./textures/sprites/confettiblue/";
+                    particleSpriteLocation = "./textures/sprites/snowflake/";
+
 					break;
 				case 1: //Gold black
-					ColorPalatte.patetteId = 1;
+					ColorPalatte.paletteId = 1;
+                    colorThemeSelection = ColorPalatte.paletteId;
+					ColorPalatte.paletteName = "Black_Gold";
 					ColorPalatte.background_color = 0xb28a16;
 					ColorPalatte.primary_color = 0x010103;
 					ColorPalatte.secondary_color = 0xb0982b;
@@ -754,11 +765,10 @@
 
 		//Change theme of the application
 		function ChangeTheme() {
-			if (ColorPalatte.patetteId == 0) {
+			if (ColorPalatte.paletteId == 0) {
 				ColorThemeSetter(1);
-				colorThemeSelection = 1;
 			}
-			else if (ColorPalatte.patetteId == 1) {
+			else if (ColorPalatte.paletteId == 1) {
 				ColorThemeSetter(0);
 				colorThemeSelection = 0;
 			}
@@ -786,6 +796,15 @@
 				sound.play();
 			});
 		}
+
+		function openThemePages() {
+			if (ColorPalatte.paletteName == "Black_Gold") {
+                location.replace("./theme1.html")
+			}
+			else if (ColorPalatte.paletteName == "Blue_White") {
+                location.replace("./index.html")
+            }
+        }
 	</script>
 
 
