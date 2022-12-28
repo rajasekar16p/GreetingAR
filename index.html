@@ -109,7 +109,7 @@
 			},
 			addSnowflakes: function () {
 				snowflake = true;
-            }
+			}
 		};
 
 		const ColorPalatte = {
@@ -122,10 +122,18 @@
 			other_color: [0x000000, 0x000000, 0x000000, 0x000000]
 		};
 
+		let isAudioPlaying = false;
+
+		const addAudioListenerToCamera = (camera) => {
+			if (!isAudioPlaying) {
+				isAudioPlaying = true;
+                AudioPlayer();
+            }
+        };
+
 		init();
 		animate();
 		animateParticles();
-
 
 		function init() {
 
@@ -140,6 +148,10 @@
 			//camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
 			camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
 			camera.position.set(0, 0, 3);
+
+            document.addEventListener("click", () => {
+                addAudioListenerToCamera(camera);
+			});
 
 			const controls = new OrbitControls(camera, container);
 			controls.minDistance = 0;
@@ -157,13 +169,12 @@
 			scene.add(group);
 
 			if (snowflake) {
-                initateSnowParticles(); //Enable for snow particles
-            }
+				initateSnowParticles(); //Enable for snow particles
+			}
 
 			//
 			//Texts
 			loadFont();
-
 
 			//text
 			//ModelS
@@ -289,11 +300,10 @@
 			gui.add(API, 'background_AR').name('AR Background');
 			gui.add(API, 'changeColor').name('Change background color');
 			gui.add(API, 'changeTheme').name('Change Theme -Temp');
-            gui.add(API, 'addSnowflakes').name('Snow');
+			gui.add(API, 'addSnowflakes').name('Snow');
 
-
-            // Showing stats
-            stats = new Stats();
+			// Showing stats
+			stats = new Stats();
 			document.body.appendChild(stats.dom);
 
 			window.addEventListener('resize', onWindowResize);
@@ -308,8 +318,6 @@
 			for (let i = 0; i < particleSystems.length; i++) {
 				scene.add(particleSystems[i]);
 			}
-
-
 		}
 
 		function createClones(value, i) {
@@ -386,7 +394,6 @@
 		}
 
 		function onWindowResize() {
-
 			camera.aspect = window.innerWidth / window.innerHeight;
 			camera.updateProjectionMatrix();
 
@@ -394,7 +401,6 @@
 		}
 
 		function onSelectStart(event) {
-
 			const controller = event.target;
 
 			const intersections = getIntersections(controller);
@@ -412,7 +418,6 @@
 		}
 
 		function onSelectEnd(event) {
-
 			const controller = event.target;
 
 			if (controller.userData.selected !== undefined) {
@@ -426,7 +431,6 @@
 		}
 
 		function getIntersections(controller) {
-
 			tempMatrix.identity().extractRotation(controller.matrixWorld);
 
 			raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
@@ -455,7 +459,6 @@
 		}
 
 		function cleanIntersected() {
-
 			while (intersected.length) {
 
 				const object = intersected.pop();
@@ -529,19 +532,14 @@
 			];
 
 			textGeo = new TextGeometry(text, {
-
 				font: font,
-
 				size: size,
 				height: height,
 				curveSegments: curveSegments,
-
 				bevelThickness: bevelThickness,
 				bevelSize: bevelSize,
 				bevelEnabled: bevelEnabled
-
 			});
-
 			textGeo.computeBoundingBox();
 
 			const centerOffset = - 0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
@@ -560,7 +558,6 @@
 			scene.add(textMesh1);
 
 			if (mirror) {
-
 				textMesh2 = new THREE.Mesh(textGeo, textMaterials);
 
 				textMesh2.position.x = centerOffset;
@@ -576,7 +573,6 @@
 		}
 
 		function refreshText() {
-
 			group.remove(textMesh1);
 			if (mirror) group.remove(textMesh2);
 
@@ -726,6 +722,25 @@
 			scene.remove.apply(scene, scene.children);
 
 			init();
+		}
+
+		function AudioPlayer() {
+			// create an AudioListener and add it to the camera
+			const listener = new THREE.AudioListener();
+			camera.add(listener);
+
+			// create a global audio source
+			const sound = new THREE.Audio(listener);
+
+			// load a sound and set it as the Audio object's buffer
+			const audioLoader = new THREE.AudioLoader();
+			audioLoader.load('/sounds/musicbox.wav', function (buffer) {
+				sound.setBuffer(buffer);
+				sound.setLoop(true);
+				sound.setVolume(0.5);
+				sound.autoplay = true;
+				sound.play();
+			});
 		}
 	</script>
 
