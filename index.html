@@ -60,7 +60,7 @@
 		let text = 'HAPPY NEW \n YEAR  2023',
 			bevelEnabled = true,
 			font = undefined,
-            fontName = 'gentilis', // helvetiker, optimer, gentilis, droid sans, droid serif
+            fontName = 'Pathout_Regular', // helvetiker, optimer, gentilis, droid sans, droid serif (Pathout_Regular ,Fresh,  Bottega_Regular)
 			fontWeight = 'bold'; // normal bold
 
 		const height = 0.0001,
@@ -82,7 +82,6 @@
 		let windowHalfY = window.innerHeight / 2;
 
 		//Text
-
 		let container;
 		let camera, scene, renderer;
 		let controller1, controller2;
@@ -760,6 +759,18 @@
 					ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
                     particleSpriteLocation = "./textures/sprites/confettigold/";
 					break;
+                case 2: //Celebration_colorful
+                    ColorPalatte.paletteId = 2;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Celebration_Colorful";
+                    ColorPalatte.background_color = 0x180d1c;
+                    ColorPalatte.primary_color = 0xf1a738;
+                    ColorPalatte.secondary_color = 0xfade98;
+                    ColorPalatte.text3dForegroundColor = "rgb(255, 165, 7)"; //"rgb(255, 207, 66)";
+                    ColorPalatte.text3dSideColor = "rgb(150, 120, 1)";
+                    ColorPalatte.other_color = [0x8EC7D2, 0x0D6986, 0xDB073D, 0xDBA507];
+                    particleSpriteLocation = "./textures/sprites/confetticolorful/";
+                    break;
 			}
 		}
 
@@ -769,9 +780,11 @@
 				ColorThemeSetter(1);
 			}
 			else if (ColorPalatte.paletteId == 1) {
-				ColorThemeSetter(0);
-				colorThemeSelection = 0;
+				ColorThemeSetter(2);
 			}
+            else if (ColorPalatte.paletteId == 2) {
+                ColorThemeSetter(0);
+            }
 			scene.remove.apply(scene, scene.children);
 
 			init();
@@ -802,6 +815,9 @@
                 location.replace("./theme1.html")
 			}
 			else if (ColorPalatte.paletteName == "Blue_White") {
+                location.replace("./theme2.html")
+			}
+            else if (ColorPalatte.paletteName == "Celebration_Colorful") {
                 location.replace("./index.html")
             }
         }

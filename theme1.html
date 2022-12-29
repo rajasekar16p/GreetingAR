@@ -94,7 +94,7 @@
 
 		let group;
 		let balloon, star, snow, bell1, bell2;
-		let colorThemeSelection = 1;
+		let colorThemeSelection = 2;
 		let snowflake = true;
 		let isSnowParticleEffect = false;
 
@@ -758,6 +758,18 @@
                     //particleSpriteLocation = "./textures/sprites/confettiblue/";
                     particleSpriteLocation = "./textures/sprites/snowflake/";
                     colorThemeSelection = 0;
+					break;
+                case 2: //Celebration_colorful
+                    ColorPalatte.paletteId = 2;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Celebration_Colorful";
+                    ColorPalatte.background_color = 0x180d1c;
+                    ColorPalatte.primary_color = 0xf1a738;
+                    ColorPalatte.secondary_color = 0xfade98;
+                    ColorPalatte.text3dForegroundColor = "rgb(255, 165, 7)"; //"rgb(255, 207, 66)";
+                    ColorPalatte.text3dSideColor = "rgb(150, 120, 1)"; 
+                    ColorPalatte.other_color = [0x8EC7D2, 0x0D6986, 0xDB073D, 0xDBA507];
+                    particleSpriteLocation = "./textures/sprites/confetticolorful/";
                     break;
 			}
 		}
