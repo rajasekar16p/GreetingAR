@@ -4,6 +4,14 @@ class ARButton {
 
 		const button = document.createElement( 'button' );
 
+		const img = document.createElement("img");
+		img.src = "./textures/logo.png";
+		img.style.position = 'absolute';
+		img.style.left = '20px';
+		img.style.bottom = '20px';
+		document.body.appendChild(img);
+
+
 		function showStartAR( /*device*/ ) {
 
 			if ( sessionInit.domOverlay === undefined ) {
@@ -65,6 +73,13 @@ class ARButton {
 				sessionInit.domOverlay.root.style.display = '';
 
 				currentSession = session;
+
+				const img = document.createElement("img");
+				img.src = "./textures/logo.png";
+				img.style.position = 'absolute';
+				img.style.top = '20px';
+				img.style.bottom = '20px';
+				document.body.appendChild(img);
 
 			}
 
