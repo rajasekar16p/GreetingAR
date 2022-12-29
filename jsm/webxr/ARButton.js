@@ -4,14 +4,6 @@ class ARButton {
 
 		const button = document.createElement( 'button' );
 
-		const img = document.createElement("img");
-		img.src = "./textures/logo.png";
-		img.style.position = 'absolute';
-		img.style.left = '100px';
-		img.style.bottom = '100px';
-		document.body.appendChild(img);
-
-
 		function showStartAR( /*device*/ ) {
 
 			if ( sessionInit.domOverlay === undefined ) {
@@ -38,6 +30,7 @@ class ARButton {
 				img.style.position = 'absolute';
 				img.style.left = '20px';
 				img.style.bottom = '20px';
+				img.id = "logo";
 				overlay.appendChild(img);
 
 				const path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
@@ -73,14 +66,6 @@ class ARButton {
 				sessionInit.domOverlay.root.style.display = '';
 
 				currentSession = session;
-
-				const img = document.createElement("img");
-				img.src = "./textures/logo.png";
-				img.style.position = 'absolute';
-				img.style.top = '50px';
-				img.style.bottom = '50px';
-				overlay.appendChild(img);
-
 			}
 
 			function onSessionEnded( /*event*/ ) {
