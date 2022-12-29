@@ -36,9 +36,9 @@ class ARButton {
 				const img = document.createElement("img");
 				img.src = "./textures/logo.png";
 				img.style.position = 'absolute';
-				img.style.right = '20px';
+				img.style.left = '20px';
 				img.style.bottom = '20px';
-				document.body.appendChild(img);
+				overlay.appendChild(img);
 
 				const path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
 				path.setAttribute( 'd', 'M 12,12 L 28,28 M 28,12 12,28' );
@@ -77,9 +77,9 @@ class ARButton {
 				const img = document.createElement("img");
 				img.src = "./textures/logo.png";
 				img.style.position = 'absolute';
-				img.style.top = '20px';
-				img.style.bottom = '20px';
-				document.body.appendChild(img);
+				img.style.top = '50px';
+				img.style.bottom = '50px';
+				overlay.appendChild(img);
 
 			}
 
