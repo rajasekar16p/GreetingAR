@@ -7,8 +7,8 @@ class ARButton {
 		const img = document.createElement("img");
 		img.src = "./textures/logo.png";
 		img.style.position = 'absolute';
-		img.style.left = '20px';
-		img.style.bottom = '20px';
+		img.style.left = '100px';
+		img.style.bottom = '100px';
 		document.body.appendChild(img);
 
 
