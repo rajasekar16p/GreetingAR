@@ -25,6 +25,13 @@ class ARButton {
 				} );
 				overlay.appendChild( svg );
 
+				const img = document.createElement("img");
+				img.src = "./textures/logo.png";
+				img.style.position = 'absolute';
+				img.style.right = '20px';
+				img.style.bottom = '20px';
+				document.body.appendChild(img);
+
 				const path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
 				path.setAttribute( 'd', 'M 12,12 L 28,28 M 28,12 12,28' );
 				path.setAttribute( 'stroke', '#fff' );
@@ -90,7 +97,7 @@ class ARButton {
 
 			button.onmouseleave = function () {
 
-				button.style.opacity = '0.5';
+				button.style.opacity = '0.65';
 
 			};
 
@@ -117,6 +124,8 @@ class ARButton {
 			button.style.cursor = 'auto';
 			button.style.left = 'calc(50% - 75px)';
 			button.style.width = '150px';
+			button.style.background = 'rgba(1,1,1,0.1)';
+			button.style.opacity = '0.5';
 
 			button.onmouseenter = null;
 			button.onmouseleave = null;
@@ -150,11 +159,12 @@ class ARButton {
 			element.style.padding = '12px 6px';
 			element.style.border = '1px solid #fff';
 			element.style.borderRadius = '4px';
-			element.style.background = 'rgba(0,0,0,0.1)';
+			element.style.background = 'rgba(0,0,0,0.5)';
+			//element.style.background = 'rgba(0,0,0,0.1)';
 			element.style.color = '#fff';
 			element.style.font = 'normal 13px sans-serif';
 			element.style.textAlign = 'center';
-			element.style.opacity = '0.5';
+			element.style.opacity = '0.8';
 			element.style.outline = 'none';
 			element.style.zIndex = '999';
 
@@ -171,7 +181,7 @@ class ARButton {
 
 				supported ? showStartAR() : showARNotSupported();
 
-			} ).catch( showARNotAllowed );
+			}).catch(showARNotAllowed);
 
 			return button;
 
@@ -186,7 +196,7 @@ class ARButton {
 
 			} else {
 
-				message.href = 'https://immersiveweb.dev/';
+				//message.href = 'https://immersiveweb.dev/';
 				message.innerHTML = 'WEBXR NOT AVAILABLE';
 
 			}
