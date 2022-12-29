@@ -93,27 +93,28 @@ a, button, input, select {
 
 /*New year additions*/
 #logo {
-	position: absolute;
-	bottom: 1rem;
-	right: 1rem;
-	width: 3rem;
-	height: 3rem;
-	border-radius: 50%;
-	box-shadow: 0 4px 16px #CCCCFF;
-	background: #FFFFFF url('textures/logo.png') center center / 70% no-repeat;
-	cursor: pointer;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    box-shadow: 0 4px 16px #CCCCFF;
+    background: #FFFFFF url('textures/logo.png') center center / 70% no-repeat;
+    cursor: pointer;
 }
 
 /*No interaction logo placement */
 #logo_NI {
-	position: absolute;
-	bottom: 1rem;
-	right: 1rem;
-	width: 3rem;
-	height: 3rem;
-	border-radius: 50%;
-	background: url('textures/logo.png') center center / 70% no-repeat;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    /*background: url('textures/logo.png') center center / 70% no-repeat;*/
 }
+
 /*Make the span take the whole size of it's parent */
 .span_link {
 	position: absolute;

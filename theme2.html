@@ -80,7 +80,7 @@
 		let balloon, star, snow, bell1, bell2;
 		let colorThemeSelection = 1;
 		let snowflake = true;
-		let isSnowParticleEffect = true;
+		let isSnowParticleEffect = false;
 
 		const API = {		
 			changeTheme: function () {
@@ -161,7 +161,7 @@
 				star = object;
 				object.scale.setScalar(0.0001);
 				object.position.x = 0;
-				object.position.y = 0.5;
+				object.position.y = 0.75;
 				object.position.z = -1;
 
 				scene.add(object);
@@ -620,17 +620,17 @@
 
 		//Color theme setup based on selection
 		function ColorThemeSetter(theme) {
-            ColorPalatte.paletteId = 0;
+            ColorPalatte.paletteId = 2;
             colorThemeSelection = ColorPalatte.paletteId;
-            ColorPalatte.paletteName = "Blue_White";
-            ColorPalatte.background_color = 0x1d395b;
-            ColorPalatte.primary_color = 0x046ec1;
-            ColorPalatte.secondary_color = 0x24b9eb;
-            ColorPalatte.text3dForegroundColor = 0x046ec1;
-            ColorPalatte.text3dSideColor = 0xffffff;
-            ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
-            particleSpriteLocation = "./textures/sprites/snowflake/";
-            isSnowParticleEffect = true;
+            ColorPalatte.paletteName = "Celebration_Colorful";
+            ColorPalatte.background_color = 0x180d1c;
+            ColorPalatte.primary_color = 0xf1a738;
+            ColorPalatte.secondary_color = 0xfade98;
+            ColorPalatte.text3dForegroundColor = "rgb(255, 165, 7)"; //"rgb(255, 207, 66)";
+            ColorPalatte.text3dSideColor = "rgb(150, 120, 1)";
+            ColorPalatte.other_color = [0x8EC7D2, 0x0D6986, 0xDB073D, 0xDBA507];
+            particleSpriteLocation = "./textures/sprites/confetticolorful/";
+            isSnowParticleEffect = false;
 		}
 
 		//Audio player setup and play functionality
