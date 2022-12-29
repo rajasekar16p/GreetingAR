@@ -10,10 +10,9 @@ body {
 
 a {
 	/*color: #ff0;*/
-	color: #00ffd7;
+	color: #ffffff;
 	text-decoration: none;
 }
-
 
 a:hover {
 	text-decoration: underline;
@@ -105,6 +104,16 @@ a, button, input, select {
 	cursor: pointer;
 }
 
+/*No interaction logo placement */
+#logo_NI {
+	position: absolute;
+	bottom: 1rem;
+	right: 1rem;
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	background: url('textures/logo.png') center center / 70% no-repeat;
+}
 /*Make the span take the whole size of it's parent */
 .span_link {
 	position: absolute;

@@ -27,10 +27,7 @@ class ARButton {
 
 				const img = document.createElement("img");
 				img.src = "./textures/logo.png";
-				img.style.position = 'absolute';
-				img.style.left = '20px';
-				img.style.bottom = '20px';
-				img.id = "logo";
+				img.id = "logo_NI";
 				overlay.appendChild(img);
 
 				const path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
