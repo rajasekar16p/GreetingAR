@@ -5,6 +5,13 @@
 	<!--<title>Adiós 2022! Hola 2023!</title>-->
 
 	<meta charset="utf-8">
+
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://celebrations.aatral.io/">
+	<meta property="og:title" content="Happy New Year 2023 - Aatral">
+	<meta property="og:description" content="Happy New Yeay 2023! Have a sparkling New Year! - Team Aatral">
+	<meta property="og:image" content="./textures/preview.png">
+
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<link type="text/css" rel="stylesheet" href="main.css">
 	<link rel="shortcut icon" type="image/jpg" href="textures/aatral_logo_square.jpg" />
@@ -64,7 +71,7 @@
 			fontWeight = 'bold'; // normal bold
 
 		const height = 0.0001,
-			size = 0.25,
+			size = 0.195,
 			hover = 0,
 			curveSegments = 4,
 			bevelThickness = 0.04,
@@ -263,6 +270,10 @@
 					createClones(randomValue, i);
 				}
 			}
+			for (let i = 0; i < 6; i++) {
+				AddExtraBalloons(i + "e");
+			}
+
 			//
 
 			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -328,6 +339,30 @@
 				scene.add(particleSystems[i]);
 			}
 		}
+
+		function AddExtraBalloons(i) {
+            const materialFbx = new THREE.MeshStandardMaterial({
+				color: ColorPalatte.other_color[1],
+                opacity: 0.9,
+                transparent: true,
+                roughness: 0.5,
+                metalness: 0.1
+            });
+
+            fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
+                const newObject = balloon.clone();
+                newObject.position.x = Math.random() * 4 - 2;
+                newObject.position.y = Math.random() * 4 - 2;
+                newObject.position.z = Math.random() * 4 - 2;
+
+				newObject.rotation.x = Math.random() * 2 * Math.PI;
+                newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                newObject.scale.setScalar(getRandomFloat(0.2, 0.7));
+                newObject.children[1].material = materialFbx;
+                newObject.name = i + "_ball_obj";
+                group.add(newObject);
+            });        }
 
 		//Create clone of the loaded models(ballons)
 		function createClones(value, i) {
@@ -547,16 +582,6 @@
 
 				refreshText();
 			});
-
-
-   //         const loader = new TTFLoader();
-
-   //         loader.load('fonts/ttf/ChRisTmAs KiTcHeN.ttf', function (json) {
-
-   //             font = new FontLoader(json);
-   //             refreshText();
-			//});
-
 		}
 
 		//Creates the new year text model
@@ -662,7 +687,7 @@
 			const particleSystems = [];
 
 			// create the vertices and add store them in our vertices array
-			for (let i = 0; i < 10000; i++) {
+			for (let i = 0; i < 5500; i++) {
 				const x = Math.random() * 2000 - 1000; // generate random number between -1000 to 1000
 				const y = Math.random() * 2000 - 1000;
 				const z = Math.random() * 2000 - 1000;
@@ -744,7 +769,8 @@
 					ColorPalatte.text3dSideColor = 0xffffff;
 					ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
 					//particleSpriteLocation = "./textures/sprites/confettiblue/";
-                    particleSpriteLocation = "./textures/sprites/snowflake/";
+					particleSpriteLocation = "./textures/sprites/snowflake/";
+					isSnowParticleEffect = true;
 
 					break;
 				case 1: //Gold black
@@ -757,7 +783,8 @@
 					ColorPalatte.text3dForegroundColor = 0x010103;
 					ColorPalatte.text3dSideColor = 0xb28a16;
 					ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
-                    particleSpriteLocation = "./textures/sprites/confettigold/";
+					particleSpriteLocation = "./textures/sprites/confettigold/";
+					isSnowParticleEffect = false;
 					break;
                 case 2: //Celebration_colorful
                     ColorPalatte.paletteId = 2;
@@ -769,7 +796,8 @@
                     ColorPalatte.text3dForegroundColor = "rgb(255, 165, 7)"; //"rgb(255, 207, 66)";
                     ColorPalatte.text3dSideColor = "rgb(150, 120, 1)";
                     ColorPalatte.other_color = [0x8EC7D2, 0x0D6986, 0xDB073D, 0xDBA507];
-                    particleSpriteLocation = "./textures/sprites/confetticolorful/";
+					particleSpriteLocation = "./textures/sprites/confetticolorful/";
+					isSnowParticleEffect = false;
                     break;
 			}
 		}
@@ -801,7 +829,7 @@
 
 			// load a sound and set it as the Audio object's buffer
 			const audioLoader = new THREE.AudioLoader();
-            audioLoader.load("./sounds/musicbox.wav", function (buffer) {
+            audioLoader.load("./sounds/ambient_loop1.wav", function (buffer) {
 				sound.setBuffer(buffer);
 				sound.setLoop(true);
 				sound.setVolume(0.5);
@@ -818,7 +846,7 @@
                 location.replace("./theme2.html")
 			}
             else if (ColorPalatte.paletteName == "Celebration_Colorful") {
-                location.replace("./index.html")
+                location.replace("./")
             }
         }
 	</script>
