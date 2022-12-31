@@ -74,7 +74,7 @@
 		let text = 'HAPPY NEW \n YEAR  2023',
 			bevelEnabled = true,
 			font = undefined,
-			fontName = 'Pathout_Regular',
+            fontName = 'Fresh',
 			fontWeight = 'bold';
 
 		const height = 0.0001,
@@ -236,9 +236,9 @@
 				}
 			}
 
-			for (let i = 0; i < 6; i++) {
-				AddExtraBalloons(i + "e");
-			}
+			//for (let i = 0; i < 6; i++) {
+			//	AddExtraBalloons(i + "e");
+			//}
 
 			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 			renderer.setPixelRatio(window.devicePixelRatio);
@@ -316,7 +316,7 @@
 
 						newObject.rotation.y = Math.random() * 2 * Math.PI;
 
-						newObject.scale.setScalar(getRandomFloat(0.00008, 0.0001));
+						newObject.scale.setScalar(getRandomFloat(0.00006, 0.000095));
 						newObject.name = i + "_star_obj";
 						group.add(newObject);
 					});
@@ -699,7 +699,7 @@
 			audioLoader.load("./sounds/ambient_loop1.wav", function (buffer) {
 				sound.setBuffer(buffer);
 				sound.setLoop(true);
-				sound.setVolume(0.5);
+				sound.setVolume(0.2);
 				sound.autoplay = true;
 				sound.play();
 			});
