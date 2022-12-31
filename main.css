@@ -107,10 +107,10 @@ a, button, input, select {
 /*No interaction logo placement */
 #logo_NI {
     position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    width: 3rem;
-    height: 3rem;
+    bottom: 0rem;
+    right: 0rem;
+    width: 0rem;
+    height: 0rem;
     /*border-radius: 50%;
     background: url('textures/logo.png') center center / 70% no-repeat;*/
 }
