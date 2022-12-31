@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Happy New Year 2023 - Aatral</title>
+	<!--<title>Adiós 2022! Hola 2023!</title>-->
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<link type="text/css" rel="stylesheet" href="main.css">
+	<link rel="shortcut icon" type="image/jpg" href="textures/aatral_logo_square.jpg" />
+</head>
+<body>
+
+    <div id="info">
+        <a href="#" target="_blank" rel="noopener">Adiós 2022! Hola 2023</a>
+    </div>
+
+    <!--<div id="logo" onclick="location.href='https://aatral.io/';"  >-->
+    <div id="logo" " >
+        <!--<a href="https://aatral.io/" target="_blank" rel="noopener">three.js</a>-->
+        <a href="https://aatral.io/" target="_blank" rel="noopener noreferrer">
+            <span class="span_link"></span>
+        </a>
+
+    </div>
+    <script id="vs" type="x-shader/x-vertex">
+        precision mediump float;
+        attribute vec3 position;
+        uniform mat4 projectionMatrix;
+        uniform mat4 modelViewMatrix;
+        uniform float size;
+        attribute float adjustSize;
+        uniform vec3 cameraPosition;
+        varying float distanceCamera;
+        attribute vec3 velocity;
+        attribute vec4 color;
+        varying vec4 vColor;
+        void main() {
+            vColor = color;
+            vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = size * adjustSize * (100.0 / length(modelViewPosition.xyz));
+            gl_Position = projectionMatrix * modelViewPosition;
+        }
+    </script>
+
+    <script id="fs" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform sampler2D texture;
+        varying vec4 vColor;
+        void main() {
+            vec4 color = vec4(texture2D(texture, gl_PointCoord));
+            gl_FragColor = color * vColor;
+        }
+    </script>
+    <!-- Import maps polyfill -->
+    <!-- Remove this when import maps will be widely supported -->
+    <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "./build/three.module.js",
+                "three/addons/": "./jsm/",
+                "three/nodes": "./jsm/nodes/Nodes.js"
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+
+    <script type="module">
+
+        import * as THREE from 'three';
+
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { ARButton } from 'three/addons/webxr/ARButton.js';
+
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+
+        import Stats from 'three/addons/libs/stats.module.js';
+        import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+        //TextS
+        import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+        import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+        import { AmbientLight } from 'three';
+        import { TTFLoader } from 'three/addons/loaders/TTFLoader.js';
+
+        let textMesh1, textMesh2, textGeo, textMaterials;
+        let text = 'HAPPY NEW \n YEAR  2023',
+            bevelEnabled = true,
+            font = undefined,
+            fontName = 'Pathout_Regular', // helvetiker, optimer, gentilis, droid sans, droid serif (Pathout_Regular ,Fresh,  Bottega_Regular)
+            fontWeight = 'bold'; // normal bold
+
+        const height = 0.0001,
+            size = 0.25,
+            hover = 0,
+            curveSegments = 4,
+            bevelThickness = 0.04,
+            bevelSize = 0.015;
+
+        const mirror = false;
+
+        let fbxLoader;
+
+        let stats, parameters;
+        const materials = [];
+        let mouse = { X: 0, Y: 0 };
+
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
+
+        //Text
+        let container;
+        let camera, scene, renderer;
+        let controller1, controller2;
+
+        let raycaster;
+
+        const intersected = [];
+        const tempMatrix = new THREE.Matrix4();
+
+        let group;
+        let balloon, star, snow, bell1, bell2;
+        let colorThemeSelection = 1;
+        let snowflake = false;
+        let isSnowParticleEffect = false;
+
+        const API = {
+            background_color: 0x000000,
+            changeColor: function () {
+                ChangeBackgroundColor();
+            },
+            background_AR: function () {
+                RemoveBackground();
+            },
+            changeTheme: function () {
+                openThemePages();
+            },
+            changeColorPalette: function () {
+                ChangeTheme();
+            },
+            addSnowflakes: function () {
+                snowflake = true;
+            }
+        };
+
+        const ColorPalatte = {
+            paletteId: 0,
+            paletteName: undefined,
+            background_color: 0x000000,
+            primary_color: 0x000000,
+            secondary_color: 0x000000,
+            text3dForegroundColor: 0x000000,
+            text3dSideColor: 0x000000,
+            other_color: [0x000000, 0x000000, 0x000000, 0x000000],
+        };
+
+        let isAudioPlaying = false;
+
+        const addAudioListenerToCamera = (camera) => {
+            if (!isAudioPlaying) {
+                isAudioPlaying = true;
+                AudioPlayer();
+            }
+        };
+
+        let particleSpriteLocation = "./textures/sprites/snowflake/";
+
+        let orbitControls,
+            planeMesh,
+            canvasTexture,
+            isAutoLaunch = true;
+
+        const gravity = new THREE.Vector3(0, -0.005, 0);
+        const friction = 0.998;
+        const noise = new SimplexNoise();
+        const textureSize = 128.0;
+        const fireworksInstances = [];
+
+        let outputDom;
+
+        const getOffsetXYZ = i => {
+            const offset = 3;
+            const index = i * offset;
+            const x = index;
+            const y = index + 1;
+            const z = index + 2;
+            return { x, y, z };
+        };
+
+        const getOffsetRGBA = i => {
+            const offset = 4;
+            const index = i * offset;
+            const r = index;
+            const g = index + 1;
+            const b = index + 2;
+            const a = index + 3;
+            return { r, g, b, a };
+        };
+
+        /* datGUI
+        --------------------------------------*/
+        const gui = new dat.GUI();
+        const guiControls = new (function () {
+            this.ParticleSize = 100;
+            this.AutoLaunch = true;
+        })();
+    
+        const getRandomNum = (max = 0, min = 0) => Math.floor(Math.random() * (max + 1 - min)) + min;
+
+        const launchFireWorks = () => {
+            if (fireworksInstances.length > 5) return;
+            const fw = Math.random() > 8 ? new BasicFIreWorks() : new RichFIreWorks();
+            fireworksInstances.push(fw);
+            scene.add(fw.meshGroup);
+        };
+
+        const autoLaunch = () => {
+            if (!isAutoLaunch) return;
+            if (Math.random() > 0.7) launchFireWorks();
+        };
+
+        const drawRadialGradation = (ctx, canvasRadius, canvasW, canvasH) => {
+            ctx.save();
+            const gradient = ctx.createRadialGradient(canvasRadius, canvasRadius, 0, canvasRadius, canvasRadius, canvasRadius);
+            gradient.addColorStop(0.0, 'rgba(255,255,255,1.0)');
+            gradient.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+            gradient.addColorStop(1.0, 'rgba(255,255,255,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvasW, canvasH);
+            ctx.restore();
+        };
+
+        const getTexture = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const diameter = textureSize;
+            canvas.width = diameter;
+            canvas.height = diameter;
+            const canvasRadius = diameter / 2;
+
+            /* gradation circle
+            ------------------------ */
+            drawRadialGradation(ctx, canvasRadius, canvas.width, canvas.height);
+            const texture = new THREE.Texture(canvas);
+            texture.type = THREE.FloatType;
+            texture.needsUpdate = true;
+            return texture;
+        };
+
+        canvasTexture = getTexture();
+
+        const getPointMesh = (num, vels, type) => {
+            // geometry
+            const bufferGeometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const velocities = [];
+            const colors = [];
+            const adjustSizes = [];
+            const masses = [];
+            const colorType = Math.random() > 0.3 ? 'single' : 'multiple';
+            const singleColor = getRandomNum(100, 20) * 0.01;
+            const multipleColor = () => getRandomNum(100, 1) * 0.01;
+            let rgbType;
+            const rgbTypeDice = Math.random();
+            if (rgbTypeDice > 0.66) {
+                rgbType = 'red';
+            } else if (rgbTypeDice > 0.33) {
+                rgbType = 'green';
+            } else {
+                rgbType = 'blue';
+            }
+            for (let i = 0; i < num; i++) {
+                const pos = new THREE.Vector3(0, 0, 0);
+                vertices.push(pos.x, pos.y, pos.z);
+                velocities.push(vels[i].x, vels[i].y, vels[i].z);
+                if (type === 'seed') {
+                    let size;
+                    if (type === 'trail') {
+                        size = Math.random() * 0.1 + 0.1;
+                    } else {
+                        size = Math.pow(vels[i].y, 2) * 0.04;
+                    }
+                    if (i === 0) size *= 1.1;
+                    adjustSizes.push(size);
+                    masses.push(size * 0.017);
+                    colors.push(1.0, 1.0, 1.0, 1.0);
+                } else {
+                    const size = getRandomNum(guiControls.ParticleSize, 10) * 0.001;
+                    adjustSizes.push(size);
+                    masses.push(size * 0.017);
+                    if (colorType === 'multiple') {
+                        colors.push(multipleColor(), multipleColor(), multipleColor(), 1.0);
+                    } else {
+                        switch (rgbType) {
+                            case 'red':
+                                colors.push(singleColor, 0.1, 0.1, 1.0);
+                                break;
+                            case 'green':
+                                colors.push(0.1, singleColor, 0.1, 1.0);
+                                break;
+                            case 'blue':
+                                colors.push(0.1, 0.1, singleColor, 1.0);
+                                break;
+                            default:
+                                colors.push(singleColor, 0.1, 0.1, 1.0);
+                        }
+                    }
+                }
+            }
+            bufferGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            bufferGeometry.setAttribute('velocity', new THREE.Float32BufferAttribute(velocities, 3));
+            bufferGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 4));
+            bufferGeometry.setAttribute('adjustSize', new THREE.Float32BufferAttribute(adjustSizes, 1));
+            bufferGeometry.setAttribute('mass', new THREE.Float32BufferAttribute(masses, 1));
+            // material
+            const shaderMaterial = new THREE.RawShaderMaterial({
+                uniforms: {
+                    size: {
+                        type: 'f',
+                        value: textureSize
+                    },
+                    texture: {
+                        type: 't',
+                        value: canvasTexture
+                    }
+                },
+                transparent: true,
+                // Display of "blending: THREE.AdditiveBlending" does not work properly if "depthWrite" property is set to true.
+                // Therefore, it is necessary to make it false in the case of making the image transparent by blending.
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                vertexShader: document.getElementById('vs').textContent,
+                fragmentShader: document.getElementById('fs').textContent
+            });
+
+            return new THREE.Points(bufferGeometry, shaderMaterial);
+        };
+
+        class ParticleMesh {
+            constructor(num, vels, type) {
+                this.particleNum = num;
+                this.timerStartFading = 10;
+                this.mesh = getPointMesh(num, vels, type);
+            }
+            update(gravity) {
+                if (this.timerStartFading > 0) this.timerStartFading -= 0.3;
+                const { position, velocity, color, mass } = this.mesh.geometry.attributes;
+                const decrementRandom = () => (Math.random() > 0.5 ? 0.98 : 0.96);
+                const decrementByVel = v => (Math.random() > 0.5 ? 0 : (1 - v) * 0.1);
+                for (let i = 0; i < this.particleNum; i++) {
+                    const { x, y, z } = getOffsetXYZ(i);
+                    velocity.array[y] += gravity.y - mass.array[i];
+                    velocity.array[x] *= friction;
+                    velocity.array[z] *= friction;
+                    velocity.array[y] *= friction;
+                    position.array[x] += velocity.array[x];
+                    position.array[y] += velocity.array[y];
+                    position.array[z] += velocity.array[z];
+                    const { a } = getOffsetRGBA(i);
+                    if (this.timerStartFading <= 0) {
+                        color.array[a] *= decrementRandom() - decrementByVel(color.array[a]);
+                        if (color.array[a] < 0.001) color.array[a] = 0;
+                    }
+                }
+                position.needsUpdate = true;
+                velocity.needsUpdate = true;
+                color.needsUpdate = true;
+            }
+            disposeAll() {
+                this.mesh.geometry.dispose();
+                this.mesh.material.dispose();
+            }
+        }
+
+        class ParticleSeedMesh extends ParticleMesh {
+            constructor(num, vels) {
+                super(num, vels, 'seed');
+            }
+            update(gravity) {
+                const { position, velocity, color, mass } = this.mesh.geometry.attributes;
+                const decrementRandom = () => (Math.random() > 0.3 ? 0.99 : 0.96);
+                const decrementByVel = v => (Math.random() > 0.3 ? 0 : (1 - v) * 0.1);
+                const shake = () => (Math.random() > 0.5 ? 0.05 : -0.05);
+                const dice = () => Math.random() > 0.1;
+                const _f = friction * 0.98;
+                for (let i = 0; i < this.particleNum; i++) {
+                    const { x, y, z } = getOffsetXYZ(i);
+                    velocity.array[y] += gravity.y - mass.array[i];
+                    velocity.array[x] *= _f;
+                    velocity.array[z] *= _f;
+                    velocity.array[y] *= _f;
+                    position.array[x] += velocity.array[x];
+                    position.array[y] += velocity.array[y];
+                    position.array[z] += velocity.array[z];
+                    if (dice()) position.array[x] += shake();
+                    if (dice()) position.array[z] += shake();
+                    const { a } = getOffsetRGBA(i);
+                    color.array[a] *= decrementRandom() - decrementByVel(color.array[a]);
+                    if (color.array[a] < 0.001) color.array[a] = 0;
+                }
+                position.needsUpdate = true;
+                velocity.needsUpdate = true;
+                color.needsUpdate = true;
+            }
+        }
+
+        class ParticleTailMesh extends ParticleMesh {
+            constructor(num, vels) {
+                super(num, vels, 'trail');
+            }
+            update(gravity) {
+                const { position, velocity, color, mass } = this.mesh.geometry.attributes;
+                const decrementRandom = () => (Math.random() > 0.3 ? 0.98 : 0.95);
+                const shake = () => (Math.random() > 0.5 ? 0.05 : -0.05);
+                const dice = () => Math.random() > 0.2;
+                for (let i = 0; i < this.particleNum; i++) {
+                    const { x, y, z } = getOffsetXYZ(i);
+                    velocity.array[y] += gravity.y - mass.array[i];
+                    velocity.array[x] *= friction;
+                    velocity.array[z] *= friction;
+                    velocity.array[y] *= friction;
+                    position.array[x] += velocity.array[x];
+                    position.array[y] += velocity.array[y];
+                    position.array[z] += velocity.array[z];
+                    if (dice()) position.array[x] += shake();
+                    if (dice()) position.array[z] += shake();
+                    const { a } = getOffsetRGBA(i);
+                    color.array[a] *= decrementRandom();
+                    if (color.array[a] < 0.001) color.array[a] = 0;
+                }
+                position.needsUpdate = true;
+                velocity.needsUpdate = true;
+                color.needsUpdate = true;
+            }
+        }
+        class BasicFIreWorks {
+            constructor() {
+                this.meshGroup = new THREE.Group();
+                this.isExplode = false;
+                const max = 400;
+                const min = 150;
+                this.petalsNum = getRandomNum(max, min);
+                this.life = 150;
+                this.seed = this.getSeed();
+                this.meshGroup.add(this.seed.mesh);
+                this.flowerSizeRate = THREE.MathUtils.mapLinear(this.petalsNum, min, max, 0.4, 0.7);
+                this.flower;
+            }
+            getSeed() {
+                const num = 40;
+                const vels = [];
+                for (let i = 0; i < num; i++) {
+                    const vx = 0;
+                    const vy = i === 0 ? Math.random() * 2.5 + 0.9 : Math.random() * 2.0 + 0.4;
+                    const vz = 0;
+                    vels.push(new THREE.Vector3(vx, vy, vz));
+                }
+                const pm = new ParticleSeedMesh(num, vels);
+                const x = Math.random() * 80 - 40;
+                const y = -50;
+                const z = Math.random() * 80 - 40;
+                pm.mesh.position.set(x, y, z);
+                return pm;
+            }
+            explode(pos) {
+                this.isExplode = true;
+                this.flower = this.getFlower(pos);
+                this.meshGroup.add(this.flower.mesh);
+                this.meshGroup.remove(this.seed.mesh);
+                this.seed.disposeAll();
+            }
+            getFlower(pos) {
+                const num = this.petalsNum;
+                const vels = [];
+                let radius;
+                const dice = Math.random();
+
+                if (dice > 0.5) {
+                    for (let i = 0; i < num; i++) {
+                        radius = getRandomNum(120, 60) * 0.01;
+                        const theta = THREE.MathUtils.degToRad(Math.random() * 180);
+                        const phi = THREE.MathUtils.degToRad(Math.random() * 360);
+                        const vx = Math.sin(theta) * Math.cos(phi) * radius;
+                        const vy = Math.sin(theta) * Math.sin(phi) * radius;
+                        const vz = Math.cos(theta) * radius;
+                        const vel = new THREE.Vector3(vx, vy, vz);
+                        vel.multiplyScalar(this.flowerSizeRate);
+                        vels.push(vel);
+                    }
+                } else {
+                    const zStep = 180 / num;
+                    const trad = (360 * (Math.random() * 20 + 1)) / num;
+                    const xStep = trad;
+                    const yStep = trad;
+                    radius = getRandomNum(120, 60) * 0.01;
+                    for (let i = 0; i < num; i++) {
+                        const sphereRate = Math.sin(THREE.MathUtils.degToRad(zStep * i));
+                        const vz = Math.cos(THREE.MathUtils.degToRad(zStep * i)) * radius;
+                        const vx = Math.cos(THREE.MathUtils.degToRad(xStep * i)) * sphereRate * radius;
+                        const vy = Math.sin(THREE.MathUtils.degToRad(yStep * i)) * sphereRate * radius;
+                        const vel = new THREE.Vector3(vx, vy, vz);
+                        vel.multiplyScalar(this.flowerSizeRate);
+                        vels.push(vel);
+                    }
+                }
+
+                const particleMesh = new ParticleMesh(num, vels);
+                particleMesh.mesh.position.set(pos.x, pos.y, pos.z);
+                return particleMesh;
+            }
+            update(gravity) {
+                if (!this.isExplode) {
+                    this.drawTail();
+                } else {
+                    this.flower.update(gravity);
+                    if (this.life > 0) this.life -= 1;
+                }
+            }
+            drawTail() {
+                this.seed.update(gravity);
+                const { position, velocity } = this.seed.mesh.geometry.attributes;
+                let count = 0;
+                let isComplete = true;
+                // Check if the y-axis speed is down for all particles
+                for (let i = 0, l = velocity.array.length; i < l; i++) {
+                    const v = velocity.array[i];
+                    const index = i % 3;
+                    if (index === 1 && v > 0) {
+                        count++;
+                    }
+                }
+
+                isComplete = count == 0;
+                if (!isComplete) return;
+                const { x, y, z } = this.seed.mesh.position;
+                const flowerPos = new THREE.Vector3(x, y, z);
+                let highestPos = 0;
+                let offsetPos;
+                for (let i = 0, l = position.array.length; i < l; i++) {
+                    const p = position.array[i];
+                    const index = i % 3;
+                    if (index === 1 && p > highestPos) {
+                        highestPos = p;
+                        offsetPos = new THREE.Vector3(position.array[i - 1], p, position.array[i + 2]);
+                    }
+                }
+                flowerPos.add(offsetPos);
+                this.explode(flowerPos);
+            }
+        }
+
+        class RichFIreWorks extends BasicFIreWorks {
+            constructor() {
+                super();
+                const max = 150;
+                const min = 100;
+                this.petalsNum = getRandomNum(max, min);
+                this.flowerSizeRate = THREE.MathUtils.mapLinear(this.petalsNum, min, max, 0.4, 0.7);
+                this.tailMeshGroup = new THREE.Group();
+                this.tails = [];
+            }
+            explode(pos) {
+                this.isExplode = true;
+                this.flower = this.getFlower(pos);
+                this.tails = this.getTail();
+                this.meshGroup.add(this.flower.mesh);
+                this.meshGroup.add(this.tailMeshGroup);
+            }
+            getTail() {
+                const tails = [];
+                const num = 20;
+                const { color: petalColor } = this.flower.mesh.geometry.attributes;
+
+                for (let i = 0; i < this.petalsNum; i++) {
+                    const vels = [];
+                    for (let j = 0; j < num; j++) {
+                        const vx = 0;
+                        const vy = 0;
+                        const vz = 0;
+                        vels.push(new THREE.Vector3(vx, vy, vz));
+                    }
+                    const tail = new ParticleTailMesh(num, vels);
+
+                    const { r, g, b, a } = getOffsetRGBA(i);
+
+                    const petalR = petalColor.array[r];
+                    const petalG = petalColor.array[g];
+                    const petalB = petalColor.array[b];
+                    const petalA = petalColor.array[a];
+
+                    const { position, color } = tail.mesh.geometry.attributes;
+
+                    for (let k = 0; k < position.count; k++) {
+                        const { r, g, b, a } = getOffsetRGBA(k);
+                        color.array[r] = petalR;
+                        color.array[g] = petalG;
+                        color.array[b] = petalB;
+                        color.array[a] = petalA;
+                    }
+
+                    const { x, y, z } = this.flower.mesh.position;
+                    tail.mesh.position.set(x, y, z);
+                    tails.push(tail);
+                    this.tailMeshGroup.add(tail.mesh);
+                }
+                return tails;
+            }
+            update(gravity) {
+                if (!this.isExplode) {
+                    this.drawTail();
+                } else {
+                    this.flower.update(gravity);
+
+                    const { position: flowerGeometory } = this.flower.mesh.geometry.attributes;
+
+                    for (let i = 0, l = this.tails.length; i < l; i++) {
+                        const tail = this.tails[i];
+                        tail.update(gravity);
+                        const { x, y, z } = getOffsetXYZ(i);
+                        const flowerPos = new THREE.Vector3(
+                            flowerGeometory.array[x],
+                            flowerGeometory.array[y],
+                            flowerGeometory.array[z]
+                        );
+                        const { position, velocity } = tail.mesh.geometry.attributes;
+                        for (let k = 0; k < position.count; k++) {
+                            const { x, y, z } = getOffsetXYZ(k);
+                            const desiredVelocity = new THREE.Vector3();
+                            const tailPos = new THREE.Vector3(position.array[x], position.array[y], position.array[z]);
+                            const tailVel = new THREE.Vector3(velocity.array[x], velocity.array[y], velocity.array[z]);
+                            desiredVelocity.subVectors(flowerPos, tailPos);
+                            const steer = desiredVelocity.sub(tailVel);
+                            steer.normalize();
+                            steer.multiplyScalar(Math.random() * 0.0003 * this.life);
+                            velocity.array[x] += steer.x;
+                            velocity.array[y] += steer.y;
+                            velocity.array[z] += steer.z;
+                        }
+                        velocity.needsUpdate = true;
+                    }
+
+                    if (this.life > 0) this.life -= 1.2;
+                }
+            }
+        }
+
+        const onResize = () => {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        };
+
+        const onClickWindow = () => {
+            if (isAutoLaunch) return;
+            launchFireWorks();
+        };
+
+
+        init();
+        animate();
+        animateParticles();
+
+        function init() {
+
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            ColorThemeSetter(colorThemeSelection);//Set color there to 0
+
+            scene = new THREE.Scene();
+            //  scene.background = new THREE.Color(0x56A2FF); //Enable for background
+
+            //camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            //camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+            //camera.position.set(0, 0, 3);
+
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, -40, 170);
+            //camera.position.set(0, 250, 0);
+            //camera.position.set(0, -250, 0);
+            camera.lookAt(scene.position);
+
+            document.addEventListener("click", () => {
+                addAudioListenerToCamera(camera);
+            });
+
+            const controls = new OrbitControls(camera, container);
+            controls.minDistance = 0;
+            controls.maxDistance = 8;
+
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+
+            const light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(0, 6, 0);
+            scene.add(light);
+            const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
+            scene.add(ambientLight);
+
+            group = new THREE.Group();
+            scene.add(group);
+
+            if (snowflake) {
+                initateSnowParticles(); //Enable for snow particles
+            }
+
+            //
+            //Texts
+            loadFont();
+
+            //text
+            //ModelS
+            //const loader = new GLTFLoader().setPath('models/newyear/gltf/snow_fx/');
+            //loader.load('scene.gltf', function (gltf) {
+            //	const model = gltf.scene;
+
+            //	gltf.scene.scale.set(5, 5, 5) // scale here
+            //	scene.add(gltf.scene);
+            //});
+
+            // model
+            fbxLoader = new FBXLoader();
+            fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
+                balloon = object;
+                //object.scale.setScalar(getRandomFloat(0.35, 0.6));
+                //object.position.z = -1;
+                //scene.add(object);
+            });
+
+            fbxLoader = new FBXLoader();
+            fbxLoader.load('models/newyear/fbx/gold-star/source/gold star.fbx', function (object) {
+                star = object;
+                object.scale.setScalar(0.0001);
+                object.position.x = 0;
+                object.position.y = 0.5;
+                object.position.z = -1;
+
+                scene.add(object);
+            });
+
+            fbxLoader = new FBXLoader();
+            fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
+                bell1 = object;
+                //object.scale.setScalar(0.001);
+            });
+
+            fbxLoader = new FBXLoader();
+            fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
+                bell2 = object;
+                //            object.scale.setScalar(0.025);
+            });
+
+            //model
+            const geometries = [
+                //new THREE.ConeGeometry(0.2, 0.2, 64),
+                new THREE.IcosahedronGeometry(0.2, 8)
+            ];
+
+            for (let i = 0; i < 100; i++) {
+                if (i % 3 == 0) {
+
+                    const geometry = geometries[Math.floor(Math.random() * geometries.length)];
+                    const material = new THREE.MeshStandardMaterial({
+                        //color: Math.random() * 0xffffff,
+                        color: getRandomBalloonColor(),
+                        opacity: 0.75,
+                        transparent: true,
+                        roughness: 0.7,
+                        metalness: 0.0
+                    });
+
+                    const object = new THREE.Mesh(geometry, material);
+
+                    object.position.x = Math.random() * 8 - 4;
+                    object.position.y = Math.random() * 8 - 4;
+                    object.position.z = Math.random() * 8 - 4;
+
+                    object.rotation.x = Math.random() * 2 * Math.PI;
+                    object.rotation.y = Math.random() * 2 * Math.PI;
+                    object.rotation.z = Math.random() * 2 * Math.PI;
+
+                    object.scale.setScalar(Math.random() + 0.5);
+                    object.name = i;
+                    group.add(object);
+                }
+                else {
+                    let randomValue = Math.floor(getRandomFloat(0, 1));
+                    createClones(randomValue, i);
+                }
+            }
+            //
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.outputEncoding = THREE.sRGBEncoding;
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(ARButton.createButton(renderer));
+
+            // controllers
+            controller1 = renderer.xr.getController(0);
+            controller1.addEventListener('selectstart', onSelectStart);
+            controller1.addEventListener('selectend', onSelectEnd);
+            scene.add(controller1);
+
+            controller2 = renderer.xr.getController(1);
+            controller2.addEventListener('selectstart', onSelectStart);
+            controller2.addEventListener('selectend', onSelectEnd);
+            scene.add(controller2);
+
+            raycaster = new THREE.Raycaster();
+
+            const gui = new GUI();
+
+            gui.addColor(API, 'background_color')
+                .listen()
+                .onChange(function () {
+                    scene.background = new THREE.Color(API.background_color);//.convertSRGBToLinear();
+                    //mesh.material.color.set(API.background-color).convertSRGBToLinear();
+                    render();
+
+                });
+            //gui.add({ enabled: false }, 'enabled')
+            //             .name('Show Background')
+            //             .onChange(value => {
+            //		scene.background = null;
+            //                 render();
+
+            //             });
+            gui.add(API, 'background_AR').name('AR Background');
+            gui.add(API, 'changeColor').name('Change background color');
+            gui.add(API, 'changeColorPalette').name('Change palette -Temp');
+            gui.add(API, 'changeTheme').name('Change Theme');
+            gui.add(API, 'addSnowflakes').name('Snow');
+
+            // Showing stats
+            stats = new Stats();
+            document.body.appendChild(stats.dom);
+            /////////////////////////////////////////////////////////
+
+            ///* Plane
+            //--------------------------------------*/
+            const planeGeometry = new THREE.PlaneGeometry(200, 200, 10, 10);
+            const planeMaterial = new THREE.MeshLambertMaterial({
+                //color: 0xffffff,
+                side: THREE.DoubleSide,
+                wireframe: true
+            });
+            planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+            planeMesh.receiveShadow = true;
+            planeMesh.rotation.x = -0.5 * Math.PI;
+            planeMesh.position.x = 0;
+            planeMesh.position.y = -50;
+            planeMesh.position.z = 0;
+            scene.add(planeMesh);
+
+
+            /* rendering start
+            -------------------------------------------------------------*/
+          //  document.body.appendChild(renderer.domElement);
+          //  requestAnimationFrame(render);
+
+
+            setInterval(autoLaunch, 100);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        //Setups the particle system
+        function initateSnowParticles() {
+            scene.fog = new THREE.FogExp2(0x000000, 0.0008);
+
+            const particleSystems = createParticleSystems();
+
+            // Add particleSystems to scene
+            for (let i = 0; i < particleSystems.length; i++) {
+                scene.add(particleSystems[i]);
+            }
+        }
+
+        //Create clone of the loaded models(ballons)
+        function createClones(value, i) {
+            switch (value) {
+                case 0:
+                    const materialFbx = new THREE.MeshStandardMaterial({
+                        //color: Math.random() * 0x6Effff,
+                        color: getRandomBalloonColor(),
+                        opacity: 0.9,
+                        transparent: true,
+                        roughness: 0.5,
+                        metalness: 0.1
+                    });
+
+                    fbxLoader.load('models/newyear/fbx/balloon/Balloon.fbx', function (object) {
+                        const newObject = balloon.clone();
+                        newObject.position.x = Math.random() * 8 - 4;
+                        newObject.position.y = Math.random() * 8 - 4;
+                        newObject.position.z = Math.random() * 8 - 4;
+                        //newObject.position.z = Math.random() * (i < 25 ? i + 1 : -(i - 25));
+                        newObject.rotation.x = Math.random() * 2 * Math.PI;
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(getRandomFloat(0.2, 0.7));
+                        newObject.children[1].material = materialFbx;
+                        newObject.name = i + "_ball_obj";
+                        group.add(newObject);
+                    });
+                    break;
+                case 1:
+                    fbxLoader.load('models/newyear/fbx/gold-star/source/gold star.fbx', function (object) {
+                        const newObject = star.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(getRandomFloat(0.00008, 0.0001));
+                        newObject.name = i + "_star_obj";
+                        group.add(newObject);
+                    });
+                    break;
+                case 2:
+                    fbxLoader.load('models/newyear/fbx/christmas-bell/source/bell.fbx', function (object) {
+                        const newObject = bell1.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(getRandomFloat(0.00075, 0.001));
+
+                        newObject.name = i + "_bell1_obj";
+                        group.add(newObject);
+                    });
+                case 3:
+                    fbxLoader.load('models/newyear/fbx/jingle-bell/source/bell.fbx', function (object) {
+                        const newObject = bell2.clone();
+                        newObject.position.x = Math.random() * 4 - 2;
+                        newObject.position.y = Math.random() * 4 - 2;
+                        newObject.position.z = Math.random() * 4 - 2;
+
+                        newObject.rotation.y = Math.random() * 2 * Math.PI;
+
+                        newObject.scale.setScalar(getRandomFloat(0.010, 0.015));
+
+                        newObject.name = i + "_bell2_obj";
+                        group.add(newObject);
+                    });
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onSelectStart(event) {
+            const controller = event.target;
+
+            const intersections = getIntersections(controller);
+
+            if (intersections.length > 0) {
+
+                const intersection = intersections[0];
+
+                const object = intersection.object;
+                object.material.emissive.b = 1;
+                controller.attach(object);
+
+                controller.userData.selected = object;
+            }
+        }
+
+        function onSelectEnd(event) {
+            const controller = event.target;
+
+            if (controller.userData.selected !== undefined) {
+
+                const object = controller.userData.selected;
+                object.material.emissive.b = 0;
+                group.attach(object);
+
+                controller.userData.selected = undefined;
+            }
+        }
+
+        function getIntersections(controller) {
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
+
+            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+            raycaster.ray.direction.set(0, 0, - 1).applyMatrix4(tempMatrix);
+
+            return raycaster.intersectObjects(group.children, false);
+        }
+
+        function intersectObjects(controller) {
+            // Do not highlight when already selected
+            if (controller.userData.selected !== undefined) return;
+
+            const intersections = getIntersections(controller);
+
+            if (intersections.length > 0) {
+
+                const intersection = intersections[0];
+
+                const object = intersection.object;
+                if (object.material.emissive != null) {
+                    object.material.emissive.r = 1;
+                    intersected.push(object);
+                }
+
+            }
+        }
+
+        function cleanIntersected() {
+            while (intersected.length) {
+
+                const object = intersected.pop();
+                object.material.emissive.r = 0;
+            }
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function animateParticles() {
+            // This will create a loop rendering at each frame
+            requestAnimationFrame(animateParticles);
+            render();
+            stats.update();
+        }
+
+        function render() {
+            //ParticlesStart
+            //const time = Date.now() * 0.00005;
+            let time = Date.now() * 0.00002;
+
+            if (isSnowParticleEffect) {
+                time = Date.now() * 0.00002;
+                for (let i = 0; i < scene.children.length; i++) {
+                    const object = scene.children[i];
+
+                    if (object instanceof THREE.Points) {
+                        object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+                    }
+                }
+
+                for (let i = 0; i < materials.length; i++) {
+                    const color = parameters[i][0];
+                    const h = (360 * ((color[0] + time) % 360)) / 360;
+                    materials[i].color.setHSL(h, color[1], color[2]);
+                }
+            }
+            else {
+                time = Date.now() * 0.00001;
+
+                for (let i = 0; i < scene.children.length; i++) {
+                    const object = scene.children[i];
+
+                    if (object instanceof THREE.Points) {
+                        object.rotation.x = time * (i < 4 ? i + 1 : -(i + 1));
+                        object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+                        object.rotation.z = time * (i < 4 ? i + 1 : -(i + 1));
+                    }
+                }
+            }
+            //Particles end
+
+            //To rotate the 3d models in the group(balloons, stars, sphere etc)
+            for (let i = 0; i < group.children.length; i++) {
+                const object = group.children[i];
+                object.rotation.y = time * (i < 4 ? i + 1 : -(i + 1));
+            }
+
+            cleanIntersected();
+
+            intersectObjects(controller1);
+            intersectObjects(controller2);
+
+            ////////////////////
+            //makeRoughGround(planeMesh);
+
+            const exploadedIndexList = [];
+
+            for (let i = fireworksInstances.length - 1; i >= 0; i--) {
+                const instance = fireworksInstances[i];
+                instance.update(gravity);
+                if (instance.isExplode) exploadedIndexList.push(i);
+            }
+
+            for (let i = 0, l = exploadedIndexList.length; i < l; i++) {
+                const index = exploadedIndexList[i];
+                const instance = fireworksInstances[index];
+                if (!instance) return;
+
+                /*
+                    Be careful because js heap size will continue to increase unless you do the following:
+                    - Remove unuse mesh from scene
+                    - Execute dispose method of Geometres and Materials in the Mesh
+                */
+                instance.meshGroup.remove(instance.seed.mesh);
+                instance.seed.disposeAll();
+                if (instance.life <= 0) {
+                    scene.remove(instance.meshGroup);
+                    if (instance.tailMeshGroup) {
+                        instance.tails.forEach(v => {
+                            v.disposeAll();
+                        });
+                    }
+                    instance.flower.disposeAll();
+                    fireworksInstances.splice(index, 1);
+                }
+            }
+
+
+            requestAnimationFrame(render);
+
+            renderer.render(scene, camera);
+        }
+
+        //TextS
+        //To load the font
+        function loadFont() {
+
+            const loader = new FontLoader();
+            loader.load('fonts/' + fontName + '_' + fontWeight + '.typeface.json', function (response) {
+
+                font = response;
+
+                refreshText();
+            });
+
+
+            //         const loader = new TTFLoader();
+
+            //         loader.load('fonts/ttf/ChRisTmAs KiTcHeN.ttf', function (json) {
+
+            //             font = new FontLoader(json);
+            //             refreshText();
+            //});
+
+        }
+
+        //Creates the new year text model
+        function createText() {
+            //textMaterials = [
+            //	new THREE.MeshPhongMaterial({ color: 0xff0000, flatShading: true }), // front
+            //	new THREE.MeshPhongMaterial({ color: 0xffffff }) // side
+            //];
+            textMaterials = [
+                new THREE.MeshPhongMaterial({ color: ColorPalatte.text3dForegroundColor, flatShading: true }), // front
+                new THREE.MeshPhongMaterial({ color: ColorPalatte.text3dSideColor }) // side
+            ];
+
+            textGeo = new TextGeometry(text, {
+                font: font,
+                size: size,
+                height: height,
+                curveSegments: curveSegments,
+                bevelThickness: bevelThickness,
+                bevelSize: bevelSize,
+                bevelEnabled: bevelEnabled
+            });
+            textGeo.computeBoundingBox();
+
+            const centerOffset = - 0.5 * (textGeo.boundingBox.max.x - textGeo.boundingBox.min.x);
+
+            textMesh1 = new THREE.Mesh(textGeo, textMaterials);
+
+            textMesh1.position.x = centerOffset;
+            textMesh1.position.y = hover;
+            textMesh1.position.z = -1;
+
+            textMesh1.rotation.x = 0;
+            textMesh1.rotation.y = Math.PI * 2;
+
+            textMesh1.name = "textmesh1";
+            //group.add(textMesh1);
+            scene.add(textMesh1);
+
+            if (mirror) {
+                textMesh2 = new THREE.Mesh(textGeo, textMaterials);
+
+                textMesh2.position.x = centerOffset;
+                textMesh2.position.y = - hover;
+                textMesh2.position.z = height;
+
+                textMesh2.rotation.x = Math.PI;
+                textMesh2.rotation.y = Math.PI * 2;
+                textMesh2.name = "textmesh2";
+
+                //group.add(textMesh2);
+            }
+        }
+
+        //refresh the text model
+        function refreshText() {
+            group.remove(textMesh1);
+            if (mirror) group.remove(textMesh2);
+
+            if (!text) return;
+
+            createText();
+        }
+
+        //Text
+        //Get random float number between two values
+        function getRandomFloat(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        //Returns random color for material from theme color palette
+        function getRandomBalloonColor() {
+            const randomVal = Math.floor(getRandomFloat(0, 4));
+            const color = ColorPalatte.other_color[randomVal];
+            //const color = Math.random() * 0x4CAAFF;
+            return color;
+        }
+
+        //Particle system for snow and confetti
+        function createParticleSystems() {
+            // Load the texture that will be used to display our snow
+            const textureLoader = new THREE.TextureLoader();
+
+            const sprite1 = textureLoader.load(
+                particleSpriteLocation + "particle1.png"
+            );
+            const sprite2 = textureLoader.load(
+                particleSpriteLocation + "particle2.png"
+            );
+            const sprite3 = textureLoader.load(
+                particleSpriteLocation + "particle3.png"
+            );
+            const sprite4 = textureLoader.load(
+                particleSpriteLocation + "particle4.png"
+            );
+            const sprite5 = textureLoader.load(
+                particleSpriteLocation + "particle5.png"
+            );
+
+            // Create the geometry that will hold all our vertices
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const particleSystems = [];
+
+            // create the vertices and add store them in our vertices array
+            for (let i = 0; i < 10000; i++) {
+                const x = Math.random() * 2000 - 1000; // generate random number between -1000 to 1000
+                const y = Math.random() * 2000 - 1000;
+                const z = Math.random() * 2000 - 1000;
+
+                vertices.push(x, y, z);
+            }
+
+            // Add the vertices stored in our array to set
+            // the position attribute of our geometry.
+            // Position attribute will be read by threejs
+            geometry.setAttribute(
+                "position",
+                new THREE.Float32BufferAttribute(vertices, 3)
+            );
+
+            parameters = [
+                [[1.0, 0.2, 0.5], sprite2, 20],
+                [[0.95, 0.2, 0.5], sprite3, 15],
+                [[0.9, 0.2, 0.5], sprite1, 10],
+                [[0.85, 0.2, 0.5], sprite5, 8],
+                [[0.8, 0.2, 0.5], sprite4, 5],
+            ];
+
+            for (let i = 0; i < parameters.length; i++) {
+                const color = parameters[i][0];
+                const sprite = parameters[i][1];
+                const size = parameters[i][2];
+
+                // Create the material that will be used to render each vertex of our geometry
+                materials[i] = new THREE.PointsMaterial({
+                    size,
+                    map: sprite,
+                    blending: THREE.AdditiveBlending,
+                    depthTest: false,
+                    transparent: true,
+                });
+                materials[i].color.setHSL(color[0], color[1], color[2]);
+
+                // Create the particle system
+                const particleSystem = new THREE.Points(geometry, materials[i]);
+
+                /* Offset the particle system x, y, z to different random points to break
+                uniformity in the direction of movement during animation */
+                particleSystem.rotation.x = Math.random() * 6;
+                particleSystem.rotation.y = Math.random() * 6;
+                particleSystem.rotation.z = Math.random() * 6;
+
+                particleSystems.push(particleSystem);
+            }
+            return particleSystems;
+        }
+
+        function RemoveBackground() {
+            API.background_color = 0x000000;
+            scene.background = null;
+            render();
+        }
+
+        function ChangeBackgroundColor() {
+            const h = Math.floor(getRandomFloat(0, 360));
+            const newColor = "hsl(" + h + ", 100%, 15%)";
+
+            API.background_color = new THREE.Color(newColor);
+            scene.background = API.background_color;
+            render();
+        }
+
+        //Color theme setup based on selection
+        function ColorThemeSetter(theme) {
+            switch (theme) {
+                case 0: //Blue white
+                    ColorPalatte.paletteId = 0;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Blue_White";
+                    ColorPalatte.background_color = 0x1d395b;
+                    ColorPalatte.primary_color = 0x046ec1;
+                    ColorPalatte.secondary_color = 0x24b9eb;
+                    ColorPalatte.text3dForegroundColor = 0x046ec1;
+                    ColorPalatte.text3dSideColor = 0xffffff;
+                    ColorPalatte.other_color = [0x1d395b, 0x046ec1, 0x24b9eb, 0xffffff];
+                    //particleSpriteLocation = "./textures/sprites/confettiblue/";
+                    particleSpriteLocation = "./textures/sprites/snowflake/";
+
+                    break;
+                case 1: //Gold black
+                    ColorPalatte.paletteId = 1;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Black_Gold";
+                    ColorPalatte.background_color = 0xb28a16;
+                    ColorPalatte.primary_color = 0x010103;
+                    ColorPalatte.secondary_color = 0xb0982b;
+                    ColorPalatte.text3dForegroundColor = 0x010103;
+                    ColorPalatte.text3dSideColor = 0xb28a16;
+                    ColorPalatte.other_color = [0xb28a16, 0x010103, 0xb0982b, 0xedd9a5];
+                    particleSpriteLocation = "./textures/sprites/confettigold/";
+                    break;
+                case 2: //Celebration_colorful
+                    ColorPalatte.paletteId = 2;
+                    colorThemeSelection = ColorPalatte.paletteId;
+                    ColorPalatte.paletteName = "Celebration_Colorful";
+                    ColorPalatte.background_color = 0x180d1c;
+                    ColorPalatte.primary_color = 0xf1a738;
+                    ColorPalatte.secondary_color = 0xfade98;
+                    ColorPalatte.text3dForegroundColor = "rgb(255, 165, 7)"; //"rgb(255, 207, 66)";
+                    ColorPalatte.text3dSideColor = "rgb(150, 120, 1)";
+                    ColorPalatte.other_color = [0x8EC7D2, 0x0D6986, 0xDB073D, 0xDBA507];
+                    particleSpriteLocation = "./textures/sprites/confetticolorful/";
+                    break;
+            }
+        }
+
+        //Change theme of the application
+        function ChangeTheme() {
+            if (ColorPalatte.paletteId == 0) {
+                ColorThemeSetter(1);
+            }
+            else if (ColorPalatte.paletteId == 1) {
+                ColorThemeSetter(2);
+            }
+            else if (ColorPalatte.paletteId == 2) {
+                ColorThemeSetter(0);
+            }
+            scene.remove.apply(scene, scene.children);
+
+            init();
+        }
+
+        //Audio player setup and play functionality
+        function AudioPlayer() {
+            // create an AudioListener and add it to the camera
+            const listener = new THREE.AudioListener();
+            camera.add(listener);
+
+            // create a global audio source
+            const sound = new THREE.Audio(listener);
+
+            // load a sound and set it as the Audio object's buffer
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load("./sounds/musicbox.wav", function (buffer) {
+                sound.setBuffer(buffer);
+                sound.setLoop(true);
+                sound.setVolume(0.5);
+                sound.autoplay = true;
+                sound.play();
+            });
+        }
+
+        function openThemePages() {
+            if (ColorPalatte.paletteName == "Black_Gold") {
+                location.replace("./theme1.html")
+            }
+            else if (ColorPalatte.paletteName == "Blue_White") {
+                location.replace("./theme2.html")
+            }
+            else if (ColorPalatte.paletteName == "Celebration_Colorful") {
+                location.replace("./index.html")
+            }
+        }
+    </script>
+
+
+</body>
+</html>
+
+
+<!--To do:
+Check if ar support, else add scene background
+Add wisher name
+add bells - done
+Add start - done
+add snow - done
+	reduce snow speed - done
+	Move happy new year back - done
+	sound to add  - done
+	animate all part- done
+	fireworks - 
+	confetti - partial
+	-->
